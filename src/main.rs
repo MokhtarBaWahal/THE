@@ -1,7 +1,6 @@
 use sysinfo::{CpuExt,Pid,  ProcessExt,System, SystemExt, PidExt, ProcessStatus, UserExt};
 use psutil::process::Process;
-// use users::{get_user_by_uid, User};
-// use std::fs;
+
 use std::thread::sleep;
 
 use crossterm::{
@@ -16,11 +15,11 @@ use std::{
 };
 use tui::{
     backend::{Backend, CrosstermBackend},
-    layout::{Constraint, Direction, Layout},
+    layout::{Alignment, Constraint, Direction, Layout},
     style::{Color, Modifier, Style},
     symbols,
-    text::Span,
-    widgets::{Axis, Block, Borders, Chart,Table, Dataset,Cell, Row, TableState},
+    text::{Span, Spans},
+    widgets::{Axis, Block, Borders, Chart,Table, Dataset,Cell, Row, TableState,  Paragraph, Wrap},
     Frame, Terminal,
 };
 
@@ -48,6 +47,8 @@ struct App  {
     sort_by_what: i32, 
     show_table: bool,
     show_graphs: bool,
+    show_single_process: bool,
+    oneP_ID: u32, 
 }
 
 impl App  {
@@ -163,6 +164,8 @@ impl App  {
             sort_by_what: sort_bby,
             show_table: true,
             show_graphs: false,
+            show_single_process: false,
+            oneP_ID: 0,
             
 
         }
@@ -426,10 +429,22 @@ fn run_app<B: Backend>(
                         };
 
                     },
-                    // KeyCode::Char('e') =>  {
-                    //     print_process_tree(&app.items, "1".to_string(), 0);
+                    KeyCode::Enter =>  {
+                        let i = match app.state.selected() {
+                            Some(i) => {
+                                let pid_string  =&app.items[i][0] ;
+                                let pid = pid_string.parse::<i32>().unwrap();
+                                app.oneP_ID = pid as u32;
+                                app.show_single_process = !app.show_single_process;
 
-                    // },
+                            }
+                            None => (),
+                        };
+                        
+                        
+                        // print_process_tree(&app.items, "1".to_string(), 0);
+
+                    },
                     
                     KeyCode::Down => app.next(),
                     KeyCode::Up => app.previous(),
@@ -448,23 +463,32 @@ fn run_app<B: Backend>(
 
 fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
-    if (app.show_graphs && app.show_table) || (!app.show_graphs && !app.show_table){
+    if (app.show_single_process){
 
-        show_full_app(f, app)  ;
+        show_one_process(f, app);
+        
+    } else {
+
+        if (app.show_graphs && app.show_table) || (!app.show_graphs && !app.show_table){
+
+            show_full_app(f, app)  ;
+    
+        }
+        if app.show_graphs && !app.show_table  {
+    
+           show_graphs_only(f, app);
+            
+        }
+    
+        if !app.show_graphs && app.show_table {
+            
+            show_table(f, app); 
+            
+    
+        }
 
     }
-    if app.show_graphs && !app.show_table  {
 
-       show_graphs_only(f, app);
-        
-    }
-
-    if !app.show_graphs && app.show_table {
-        
-        show_table(f, app); 
-        
-
-    }
 
 
 
@@ -594,11 +618,22 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     f.render_widget(chart, chunks_upper[0]);
 
 
+    
+    let x_labels = vec![
+        Span::styled(
+            format!("{}", app.time.to_string() + "s"),
+            Style::default().add_modifier(Modifier::BOLD),
+        ),
+        Span::styled(
+            format!("{}", "0"),
+            Style::default().add_modifier(Modifier::BOLD),
+        ),
+    ];
     let datasets = vec![
         Dataset::default()
-            .name("data1")
+            .name("CPU Usage",)
             .marker(symbols::Marker::Dot)
-            .style(Style::default().fg(Color::Cyan))
+            .style(Style::default().fg(Color::Blue))
             .data(&app.data_mem),
         
     ];
@@ -616,23 +651,21 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         )
         .x_axis(
             Axis::default()
-                .title("X Axis")
+                .title("Time")
                 .style(Style::default().fg(Color::Gray))
-                .bounds([0.0, 5.0])
-                .labels(vec![]),
+                .labels(x_labels)
+                .bounds(app.window),
         )
         .y_axis(
             Axis::default()
-                .title("Y Axis")
-                .style(Style::default().fg(Color::Gray))
-                .bounds([0.0, 5.0])
+                .title("Percentage")
+                .style(Style::default().fg(Color::Cyan))
                 .labels(vec![
-                    Span::styled("0", Style::default().add_modifier(Modifier::BOLD)),
-                    Span::raw("2.5"),
-                    Span::styled("5.0", Style::default().add_modifier(Modifier::BOLD)),
-                ]),
+                    Span::raw("0"),
+                    Span::styled("100", Style::default().add_modifier(Modifier::BOLD)),
+                ])
+                .bounds([0.0, 100.0]),
         );
-
     f.render_widget(chart, chunks_upper[1]);
 
     let rects = Layout::default()
@@ -700,96 +733,104 @@ fn show_graphs_only<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
 
 
-        let x_labels = vec![
-            Span::styled(
-                format!("{}", app.time.to_string() + "s"),
-                Style::default().add_modifier(Modifier::BOLD),
-            ),
-            Span::styled(
-                format!("{}", "0"),
-                Style::default().add_modifier(Modifier::BOLD),
-            ),
-        ];
-        let datasets = vec![
-            Dataset::default()
-                .name("CPU Usage",)
-                .marker(symbols::Marker::Dot)
-                .style(Style::default().fg(Color::Red))
-                .data(&app.data_cpu_avg),
-            
-        ];
+    let x_labels = vec![
+        Span::styled(
+            format!("{}", app.time.to_string() + "s"),
+            Style::default().add_modifier(Modifier::BOLD),
+        ),
+        Span::styled(
+            format!("{}", "0"),
+            Style::default().add_modifier(Modifier::BOLD),
+        ),
+    ];
+    let datasets = vec![
+        Dataset::default()
+            .name("CPU Usage",)
+            .marker(symbols::Marker::Dot)
+            .style(Style::default().fg(Color::Red))
+            .data(&app.data_cpu_avg),
+        
+    ];
 
-        let chart = Chart::new(datasets)
-            .block(
-                Block::default()
-                    .title(Span::styled(
-                        "CPU usage",
-                        Style::default()
-                            .fg(Color::Cyan)
-                            .add_modifier(Modifier::BOLD),
-                    ))
-                    .borders(Borders::ALL),
-            )
-            .x_axis(
-                Axis::default()
-                    .title("Time")
-                    .style(Style::default().fg(Color::Gray))
-                    .labels(x_labels)
-                    .bounds(app.window),
-            )
-            .y_axis(
-                Axis::default()
-                    .title("Percentage")
-                    .style(Style::default().fg(Color::Cyan))
-                    .labels(vec![
-                        Span::raw("0"),
-                        Span::styled("100", Style::default().add_modifier(Modifier::BOLD)),
-                    ])
-                    .bounds([0.0, 100.0]),
-            );
-        f.render_widget(chart, chunks[0]);
-
-
-        let datasets = vec![
-            Dataset::default()
-                .name("data1")
-                .marker(symbols::Marker::Dot)
+    let chart = Chart::new(datasets)
+        .block(
+            Block::default()
+                .title(Span::styled(
+                    "CPU usage",
+                    Style::default()
+                        .fg(Color::Cyan)
+                        .add_modifier(Modifier::BOLD),
+                ))
+                .borders(Borders::ALL),
+        )
+        .x_axis(
+            Axis::default()
+                .title("Time")
+                .style(Style::default().fg(Color::Gray))
+                .labels(x_labels)
+                .bounds(app.window),
+        )
+        .y_axis(
+            Axis::default()
+                .title("Percentage")
                 .style(Style::default().fg(Color::Cyan))
-                .data(&app.data_mem),
-            
-        ];
+                .labels(vec![
+                    Span::raw("0"),
+                    Span::styled("100", Style::default().add_modifier(Modifier::BOLD)),
+                ])
+                .bounds([0.0, 100.0]),
+        );
+    f.render_widget(chart, chunks[0]);
 
-        let chart = Chart::new(datasets)
-            .block(
-                Block::default()
-                    .title(Span::styled(
-                        "Memory usage",
-                        Style::default()
-                            .fg(Color::Cyan)
-                            .add_modifier(Modifier::BOLD),
-                    ))
-                    .borders(Borders::ALL),
-            )
-            .x_axis(
-                Axis::default()
-                    .title("X Axis")
-                    .style(Style::default().fg(Color::Gray))
-                    .bounds([0.0, 5.0])
-                    .labels(vec![]),
-            )
-            .y_axis(
-                Axis::default()
-                    .title("Y Axis")
-                    .style(Style::default().fg(Color::Gray))
-                    .bounds([0.0, 5.0])
-                    .labels(vec![
-                        Span::styled("0", Style::default().add_modifier(Modifier::BOLD)),
-                        Span::raw("2.5"),
-                        Span::styled("5.0", Style::default().add_modifier(Modifier::BOLD)),
-                    ]),
-            );
 
-            f.render_widget(chart, chunks[1]);
+    let x_labels = vec![
+        Span::styled(
+            format!("{}", app.time.to_string() + "s"),
+            Style::default().add_modifier(Modifier::BOLD),
+        ),
+        Span::styled(
+            format!("{}", "0"),
+            Style::default().add_modifier(Modifier::BOLD),
+        ),
+    ];
+    let datasets = vec![
+        Dataset::default()
+            .name("CPU Usage",)
+            .marker(symbols::Marker::Dot)
+            .style(Style::default().fg(Color::Blue))
+            .data(&app.data_mem),
+        
+    ];
+
+    let chart = Chart::new(datasets)
+        .block(
+            Block::default()
+                .title(Span::styled(
+                    "Memory usage",
+                    Style::default()
+                        .fg(Color::Cyan)
+                        .add_modifier(Modifier::BOLD),
+                ))
+                .borders(Borders::ALL),
+        )
+        .x_axis(
+            Axis::default()
+                .title("Time")
+                .style(Style::default().fg(Color::Gray))
+                .labels(x_labels)
+                .bounds(app.window),
+        )
+        .y_axis(
+            Axis::default()
+                .title("Percentage")
+                .style(Style::default().fg(Color::Cyan))
+                .labels(vec![
+                    Span::raw("0"),
+                    Span::styled("100", Style::default().add_modifier(Modifier::BOLD)),
+                ])
+                .bounds([0.0, 100.0]),
+        );
+    f.render_widget(chart, chunks[1]);
 
 }
 
@@ -848,5 +889,74 @@ fn show_table<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             Constraint::Percentage(8),
         ]);
     f.render_stateful_widget(t, chunks[0], &mut app.state);
+
+}
+
+fn show_one_process <B: Backend>(f: &mut Frame<B>, app: &mut App){
+
+    let size = f.size(); 
+    let pid = app.oneP_ID;
+    if let Some(process) = app.system.process(Pid::from_u32(pid)) {
+
+        let name = process.name();
+        let status = format!("{:?}", process.status());
+        let memory = process.memory();
+        let exe = process.exe().display();
+        let run_time = process.run_time();
+        let cmd = format!("{:?}", process.cmd());
+        let start_time = process.start_time();
+        let cpu_usage = process.cpu_usage();
+        let cwd = process.cwd().display();
+        let virtual_memory = process.virtual_memory();
+        let parent = format!("{:?}", process.parent());
+        let root = process.root().display();
+
+        let output = format!("PID: {}\n Name: {}\nStatus: {}\nMemory: {} bytes\nExecutable: {}\nRun time: {} seconds\nCommand: {:?}\nStart time: {} seconds\nCPU usage: {}%\nCurrent working directory: {}\nVirtual memory: {} bytes\nParent process: {:?}\nRoot directory: {}",
+                            pid, name, status, memory, exe, run_time, cmd, start_time, cpu_usage, cwd, virtual_memory, parent, root);
+
+   
+    // Words made "loooong" to demonstrate line breaking.
+    let s = "";
+    let mut long_line = s.repeat(usize::from(size.width) / s.len() + 4);
+    long_line.push('\n');
+
+    let block = Block::default().style(Style::default().bg(Color::White).fg(Color::Black));
+    // f.render_widget(block, size);
+
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(5)
+        .constraints(
+            [
+                Constraint::Percentage(100),
+                
+            ]
+            .as_ref(),
+        )
+        .split(size);
+
+    let text = vec![
+        
+        Spans::from(Span::styled(&long_line, Style::default().bg(Color::Green))),
+      
+    ];
+
+    let create_block = |title| {
+        Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().bg(Color::White).fg(Color::Black))
+            .title(Span::styled(
+                title,
+                Style::default().add_modifier(Modifier::BOLD),
+            ))
+    };
+
+    let paragraph = Paragraph::new(text)
+        .style(Style::default().bg(Color::White).fg(Color::Black))
+        .block(create_block("Right, wrap"))
+        .alignment(Alignment::Left)
+        .wrap(Wrap { trim: true });
+    f.render_widget(paragraph, chunks[0]);
+}
 
 }
