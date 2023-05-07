@@ -1,7 +1,6 @@
 use sysinfo::{CpuExt,Pid,  ProcessExt,System, SystemExt, PidExt, ProcessStatus, UserExt};
 use psutil::process::Process;
 
-
 use std::thread::sleep;
 
 use crossterm::{
@@ -187,25 +186,6 @@ impl App  {
         };
         self.state.select(Some(i));
     }
-
-    pub fn next_o(&mut self, index: u32) {
-        // let i = match self.state.selected() {
-        //     Some(i) => {
-        //         if i >= self.items.len() - 1 {
-        //             0
-        //         } else {
-        //             i + 1
-        //         }
-        //     }
-        //     None => 0,
-        // };
-        let i = match self.state.selected() {
-            Some(i) => i,
-            None => 0,
-        };
-        self.state.select(Some(i + index as usize));
-        
-    }
     
     pub fn previous(&mut self) {
         let i = match self.state.selected() {
@@ -225,8 +205,7 @@ impl App  {
         
    
 
-    fn on_tick(&mut self) {
-        let sys = System::new_all();
+    fn on_tick(&mut self ,sys: &System) {
         for _ in 0..10{
             self.data_cpu_avg.remove(0);
             self.data_mem.remove(0);
@@ -402,40 +381,13 @@ fn run_app<B: Backend>(
     tick_rate: Duration,
 ) -> io::Result<()> {
     let mut last_tick = Instant::now();
-    let mut last_down_press = Instant::now();
-    let mut down_key_held = false;
-    let mut down_click = 0;
-    let mut held_down = false;
-     //let start_time = Instant::now();
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
 
         let timeout = tick_rate
             .checked_sub(last_tick.elapsed())
             .unwrap_or_else(|| Duration::from_secs(0));
-        let elapsed_time = last_tick.elapsed();
-        // if elapsed_time < tick_rate {
-        //     std::thread::sleep(tick_rate - elapsed_time);
-        // }
-        //if crossterm::event::poll(Duration::from_secs(0))? {
-            // if let Ok(Event::Key(crossterm::event::KeyEvent { code: KeyCode::Down, .. })) = crossterm::event::read() {
-            //     if !held_down {
-            //         down_click += 1;
-            //         last_down_press = std::time::Instant::now();
-            //         held_down = true;
-            //         app.next_o(down_click);
-            //     } else {
-            //         let now = std::time::Instant::now();
-            //         if now.duration_since(last_down_press) >= Duration::from_millis(200) {
-            //             down_click += 1;
-            //             last_down_press = now;
-            //             app.next_o(down_click);
-            //         }
-            //     }
-            // } else {
-            //     held_down = false;
-            //     down_click = 0;
-            // }
+        if crossterm::event::poll(timeout)? {
             if let Event::Key(key) = event::read()? {
                 match key.code {
                     KeyCode::Char('q') => return Ok(()),
@@ -494,45 +446,16 @@ fn run_app<B: Backend>(
 
                     },
                     
-                    // KeyCode::Down => {
-                    //     let now = Instant::now();
-                    //     down_click += 1;
-                    //     if now.duration_since(last_down_press) >= Duration::from_millis(200) {
-                    //         app.next_o(down_click);
-                    //         last_down_press = now;
-                    //         down_click = 0;
-                    //     }
-                    // },
-
-                    // KeyCode::Down => {
-                    //     if !held_down {
-                    //         down_click += 1;
-                    //         last_down_press = std::time::Instant::now();
-                    //         held_down = true;
-                    //         app.next_o(down_click);
-                    //     } else {
-                    //         let now = std::time::Instant::now();
-                    //         if now.duration_since(last_down_press) >= Duration::from_millis(200) {
-                    //             down_click += 1;
-                    //             last_down_press = now;
-                    //             app.next_o(down_click);
-                    //         }
-                    //     }
-                    // } else {
-                    //     held_down = false;
-                    //     down_click = 0;
-                    // }
-                    
                     KeyCode::Down => app.next(),
                     KeyCode::Up => app.previous(),
                     _ => {}
                 }
             }
-        //}
+        }
 
-         //let sys = System::new_all();
+        let sys = System::new_all();
         if last_tick.elapsed() >= tick_rate {
-            app.on_tick();
+            app.on_tick(&sys);
             last_tick = Instant::now();
         }
     }
@@ -1034,7 +957,7 @@ fn show_one_process <B: Backend>(f: &mut Frame<B>, app: &mut App){
 
    
     // Words made "loooong" to demonstrate line breaking.
-    let s = "hhhh";
+    let s = " hhhhhhhhhhhhhhhhhhhh";
     let mut long_line = s.repeat(usize::from(size.width) / s.len() + 4);
     long_line.push('\n');
 
