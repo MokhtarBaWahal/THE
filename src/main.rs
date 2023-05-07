@@ -3,8 +3,6 @@ use psutil::process::Process;
 
 use std::thread::sleep;
 
-use std::env;
-
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
@@ -385,12 +383,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let sys = System::new_all();
 
     let tick_rate = Duration::from_millis(2000);
-    let arg_str = if args.len() > 1 {
-        &args[1]
-    } else {
-        ""
-    };
-    let app = App::new(tick_rate, &sys, arg_str.to_string());
+    let app = App::new(tick_rate, &sys);
     let res = run_app(&mut terminal, app, tick_rate);
 
     // restore terminal
@@ -647,9 +640,6 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 .style(Style::default().fg(Color::Cyan))
                 .labels(vec![
                     Span::raw("0"),
-                    Span::styled("25", Style::default().add_modifier(Modifier::BOLD)),
-                    Span::styled("50", Style::default().add_modifier(Modifier::BOLD)),
-                    Span::styled("75", Style::default().add_modifier(Modifier::BOLD)),
                     Span::styled("100", Style::default().add_modifier(Modifier::BOLD)),
                 ])
                 .bounds([0.0, 100.0]),
@@ -701,6 +691,9 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 .style(Style::default().fg(Color::Cyan))
                 .labels(vec![
                     Span::raw("0"),
+                    Span::styled("25", Style::default().add_modifier(Modifier::BOLD)),
+                    Span::styled("50", Style::default().add_modifier(Modifier::BOLD)),
+                    Span::styled("75", Style::default().add_modifier(Modifier::BOLD)),
                     Span::styled("100", Style::default().add_modifier(Modifier::BOLD)),
                 ])
                 .bounds([0.0, 100.0]),
@@ -721,7 +714,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .style(normal_style)
         .height(1)
         .bottom_margin(1);
-    let table_data = 
+    // let table_data =
     let rows = app.items.iter().map(|item| {
         let height = item
             .iter()
