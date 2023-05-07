@@ -2,9 +2,7 @@ use sysinfo::{CpuExt,Pid,  ProcessExt,System, SystemExt, PidExt, ProcessStatus, 
 use psutil::process::Process;
 
 use std::thread::sleep;
-
 use std::env;
-
 use humantime::parse_duration;
 
 use crossterm::{
@@ -52,7 +50,9 @@ struct App  {
     show_table: bool,
     show_graphs: bool,
     show_single_process: bool,
-    oneP_ID: u32, 
+    oneP_ID: u32,
+    user_n: String, 
+   
 }
 
 impl App  {
@@ -128,11 +128,11 @@ impl App  {
             let tem_process: Vec<String> = vec![
                 pid_string,
                 user_name.name().to_string(),
-                //parent_pid_string,
+                parent_pid_string,
                 priority.to_string(),
                 nice.to_string(),
                 //nice.to_string(),
-                virtual_memory.to_string(),
+                //virtual_memory.to_string(),
                 memory.to_string(),
                 shared_memory.to_string(),
                 state.to_string(),
@@ -154,28 +154,7 @@ impl App  {
             a_pid.cmp(&b_pid)
         });
         let sort_bby = 0;
-        if args == "-g" {
-            App {
-                system,
-                data_cpu_avg,
-                data_cpus,
-                data_mem,
-                data_swap,
-                x,
-                time,
-                window: [0.0, 200.0],
-                state: TableState::default(),
-                items,
-                sort_by_what: sort_bby,
-                show_table: false,
-                show_graphs: true,
-                show_single_process: false,
-                oneP_ID: 0,
-                
-    
-            }
-        }
-        else{
+        if args == "" {
             App {
                 system,
                 data_cpu_avg,
@@ -192,6 +171,32 @@ impl App  {
                 show_graphs: false,
                 show_single_process: false,
                 oneP_ID: 0,
+                user_n: args
+                
+    
+            }
+        }
+        else{
+            items = items.into_iter()
+            .filter(|v| v.get(1)==Some(&args))
+            .collect();
+            App {
+                system,
+                data_cpu_avg,
+                data_cpus,
+                data_mem,
+                data_swap,
+                x,
+                time,
+                window: [0.0, 200.0],
+                state: TableState::default(),
+                items,
+                sort_by_what: sort_bby,
+                show_table: true,
+                show_graphs: false,
+                show_single_process: false,
+                oneP_ID: 0,
+                user_n: args,
                 
     
             }
@@ -231,11 +236,11 @@ impl App  {
     }
 
 
-  
+        
    
 
-    fn on_tick(&mut self) {
-        // let sys = System::new_all();
+    fn on_tick(&mut self ) {
+
         for _ in 0..10{
             self.data_cpu_avg.remove(0);
             self.data_mem.remove(0);
@@ -306,16 +311,7 @@ impl App  {
             let total_memory = self.system.total_memory();
             let mem_percent = (memory as f32 / total_memory as f32) * 100000.0;
             let mem_usage_str = format!("{:.2}%", mem_percent);
-
-            //std::thread::sleep(Duration::from_secs(1));
-            //self.system.refresh_all();
-            //let cpu_usage_start = process.cpu_usage();
-            //std::thread::sleep(std::time::Duration::from_millis(500));
-            //let cpu_usage_end = process.cpu_usage();
-            //let cpu_usage = cpu_usage_end - cpu_usage_start;
             let cpu_usage = process.cpu_usage();
-            
-            
             let cpu_usage_str = format!("{:.2}%", cpu_usage);
             let cpu_time = process.run_time() * 100;
             //let process_u = Process::new(pid_string.parse::<u32>().unwrap()).unwrap();
@@ -340,15 +336,14 @@ impl App  {
             let tem_process: Vec<String> = vec![
                 pid_string,
                 user_name.name().to_string(),
-                //parent_pid_string,
+                parent_pid_string,
                 priority.to_string(),
                 nice.to_string(),
                 //nice.to_string(),
-                virtual_memory.to_string(),
+                //virtual_memory.to_string(),
                 memory.to_string(),
                 shared_memory.to_string(),
                 state.to_string(),
-                //cpu_usage.to_string(),
                 cpu_usage_str,
                 //cpu_percent.to_string(),
                 mem_usage_str,
@@ -373,42 +368,43 @@ impl App  {
 
         } 
         else if self.sort_by_what == 1{
-            items.sort_by(|a, b| a[1].cmp(&b[1]));
+             items.sort_by(|a, b| a[1].cmp(&b[1]));
+            //items.sort_by_key(|v| v[11].to_lowercase());
         }
         else if self.sort_by_what == 2{
-            items.sort_by(|a, b| {
-                let a_pid: i32 = a[2].parse().unwrap_or(0);
-                let b_pid: i32 = b[2].parse().unwrap_or(0);
-                b_pid.cmp(&a_pid)
-            });
-        }
-        else if self.sort_by_what == 3{
             items.sort_by(|a, b| {
                 let a_pid: i32 = a[3].parse().unwrap_or(0);
                 let b_pid: i32 = b[3].parse().unwrap_or(0);
                 b_pid.cmp(&a_pid)
             });
         }
-        else if self.sort_by_what == 4{
+        else if self.sort_by_what == 3{
             items.sort_by(|a, b| {
                 let a_pid: i32 = a[4].parse().unwrap_or(0);
                 let b_pid: i32 = b[4].parse().unwrap_or(0);
                 b_pid.cmp(&a_pid)
             });
         }
-        else if self.sort_by_what == 5{
+        else if self.sort_by_what == 4{
             items.sort_by(|a, b| {
                 let a_pid: i32 = a[5].parse().unwrap_or(0);
                 let b_pid: i32 = b[5].parse().unwrap_or(0);
                 b_pid.cmp(&a_pid)
             });
         }
-        else if self.sort_by_what == 6{
+        else if self.sort_by_what == 5{
             items.sort_by(|a, b| {
                 let a_pid: i32 = a[6].parse().unwrap_or(0);
                 let b_pid: i32 = b[6].parse().unwrap_or(0);
                 b_pid.cmp(&a_pid)
             });
+        }
+        else if self.sort_by_what == 6{
+            // items.sort_by(|a, b| {
+            //     let a_pid: i32 = a[7].parse().unwrap_or(0);
+            //     let b_pid: i32 = b[7].parse().unwrap_or(0);
+            //     b_pid.cmp(&a_pid)
+            // });
         }
         else if self.sort_by_what == 7{
             items.sort_by(|a, b| {
@@ -441,7 +437,7 @@ impl App  {
             });
         }
         else if self.sort_by_what == 11{
-            items.sort_by(|a, b| b[11].cmp(&a[3]));
+            items.sort_by(|a, b| b[12].cmp(&a[12]));
         }  
         else {
             
@@ -452,14 +448,29 @@ impl App  {
         self.items = items;
     
 
-
-    
-
     }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
+    let mut user_selected ="";
+
+     if args.len()>1 {
+        if args[1]=="pstree"{
+            let sys = System::new_all();
+            let tick_rate = Duration::from_millis(2000);
+            let app = App::new(tick_rate, &sys, user_selected.to_string());
+         
+            print_process_tree(&app.items, "1".to_string(), 0);
+            return Ok(())
+        }
+        if args[1]=="u" && args.len()>2{
+            
+            user_selected= &args[2];
+            
+        }
+
+    } 
     // setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -470,16 +481,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     // // create app and run it
     let mut sys = System::new_all();
     sys.refresh_all();
-    
-    //let accurate_cpu_time = sysinfo::MINIMUM_CPU_UPDATE_INTERVAL
 
     let tick_rate = Duration::from_millis(2000);
-    let arg_str = if args.len() > 1 {
-        &args[1]
-    } else {
-        ""
-    };
-    let app = App::new(tick_rate, &sys, arg_str.to_string());
+    let app = App::new(tick_rate, &sys, user_selected.to_string());
     let res = run_app(&mut terminal, app, tick_rate);
 
     // restore terminal
@@ -510,6 +514,7 @@ fn run_app<B: Backend>(
     let mut selected_index: Option<usize> = None;
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
+
         let timeout = tick_rate
             .checked_sub(last_tick.elapsed())
             .unwrap_or_else(|| Duration::from_secs(0));
@@ -529,20 +534,20 @@ fn run_app<B: Backend>(
                         app.show_table = true;
                         app.show_graphs= true;
                     } 
-                    KeyCode::Char('p') =>  {
-                        // app.items.sort_by(|a, b| {
-                        //     let a_pid: i32 = a[0].parse().unwrap_or(0);
-                        //     let b_pid: i32 = b[0].parse().unwrap_or(0);
-                        //     a_pid.cmp(&b_pid)
-                        // });
-                        app.sort_by_what = 0;
+                    // KeyCode::Char('p') =>  {
+                    //     app.items.sort_by(|a, b| {
+                    //         let a_pid: i32 = a[0].parse().unwrap_or(0);
+                    //         let b_pid: i32 = b[0].parse().unwrap_or(0);
+                    //         a_pid.cmp(&b_pid)
+                    //     });
+                    //     app.sort_by_what = 0;
 
-                    },
-                    KeyCode::Char('n') =>  {
-                        app.items.sort_by_key(|v| v[11].to_lowercase());
-                        app.sort_by_what = 1;
+                    // },
+                    // KeyCode::Char('n') =>  {
+                    //     app.items.sort_by_key(|v| v[11].to_lowercase());
+                    //     app.sort_by_what = 1;
 
-                    },
+                    // },
                     KeyCode::Char('k') =>  {
                         let i = match app.state.selected() {
                             Some(i) => {
@@ -558,15 +563,9 @@ fn run_app<B: Backend>(
 
                     KeyCode::Char('s') => {
                         s_pressed = true;
-                    
                     },
 
                     KeyCode::Char('f') => {
-                        // app.items.sort_by(|a, b| {
-                        //     let a_pid: i32 = a[8].parse().unwrap_or(0);
-                        //     let b_pid: i32 = b[8].parse().unwrap_or(0);
-                        //     b_pid.cmp(&a_pid)
-                        // });
                         f_pressed = true;
                     
                     },
@@ -613,10 +612,10 @@ fn run_app<B: Backend>(
                             app.sort_by_what = 10;
 
                         }
-                        else if c == 'c'{
-                            app.sort_by_what = 11;
+                        // else if c == 'x'{
+                        //     app.sort_by_what = 11;
 
-                        }
+                        // }
                         
                         f_pressed = false;
                     }
@@ -648,6 +647,7 @@ fn run_app<B: Backend>(
                         }
                                             s_pressed = false;
                     },
+
 
 
                     KeyCode::Enter =>  {
@@ -765,7 +765,7 @@ fn print_process_tree(items:  &[Vec<String>], id: String,  depth: usize) {
 fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let size = f.size();
-
+ 
     
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
@@ -779,7 +779,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .split(size);
 
 
-    let chunks_upper = Layout::default()
+    let chunks_left = Layout::default()
         .direction(Direction::Vertical)
         .constraints(
             [
@@ -834,11 +834,14 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 .style(Style::default().fg(Color::Cyan))
                 .labels(vec![
                     Span::raw("0"),
+                    Span::styled("25", Style::default().add_modifier(Modifier::BOLD)),
+                    Span::styled("50", Style::default().add_modifier(Modifier::BOLD)),
+                    Span::styled("75", Style::default().add_modifier(Modifier::BOLD)),
                     Span::styled("100", Style::default().add_modifier(Modifier::BOLD)),
                 ])
                 .bounds([0.0, 100.0]),
         );
-    f.render_widget(chart, chunks_upper[1]);
+    f.render_widget(chart, chunks_left[1]);
 
 
     
@@ -885,26 +888,41 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 .style(Style::default().fg(Color::Cyan))
                 .labels(vec![
                     Span::raw("0"),
+                    Span::styled("25", Style::default().add_modifier(Modifier::BOLD)),
+                    Span::styled("50", Style::default().add_modifier(Modifier::BOLD)),
+                    Span::styled("75", Style::default().add_modifier(Modifier::BOLD)),
                     Span::styled("100", Style::default().add_modifier(Modifier::BOLD)),
                 ])
                 .bounds([0.0, 100.0]),
         );
-    f.render_widget(chart, chunks_upper[2]);
-
+    f.render_widget(chart, chunks_left[2]);
+    let chunks_right = Layout::default()
+    .direction(Direction::Vertical)
+    .constraints(
+        [
+            Constraint::Percentage(80),
+            Constraint::Percentage(20),
+            
+            
+        ]
+        .as_ref(),
+    )
+    .split(chunks[1]);  
     let rects = Layout::default()
         .constraints([Constraint::Percentage(50)].as_ref())
-        .margin(5)  
-        .split(chunks[1]);
+        .margin(0)  
+        .split(chunks_right[0]);
 
     let selected_style = Style::default().add_modifier(Modifier::REVERSED);
     let normal_style = Style::default().bg(Color::Blue);
-    let header_cells = ["PID", "USER", "PR", "NI", "VIRT", "RES", "SHR", "S", "%CPU", "%MEM", "TIME+", "COMMAND"]
+    let header_cells = ["PID", "USER", "PTID", "PR", "NI",  "RES", "SHR", "S", "%CPU", "%MEM", "TIME+", "COMMAND"]
         .iter()
         .map(|h| Cell::from(*h).style(Style::default().fg(Color::Red)));
     let header = Row::new(header_cells)
         .style(normal_style)
         .height(1)
         .bottom_margin(1);
+    // let table_data =
     let rows = app.items.iter().map(|item| {
         let height = item
             .iter()
@@ -934,33 +952,43 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             Constraint::Percentage(8),
             Constraint::Percentage(8),
         ]);
+        
     f.render_stateful_widget(t, rects[0], &mut app.state);
 
-    let block = Block::default().style(Style::default().bg(Color::White).fg(Color::Black));
-    // f.render_widget(block, size);
 
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .margin(5)
-        .constraints(
-            [
-                Constraint::Percentage(100),
-                
-            ]
-            .as_ref(),
-        )
-        .split(size);
+    let name = if let Some (name ) = app.system.name() { name } else { todo!() };
+    let kVerison = if let Some (kVerison ) = app.system.kernel_version() { kVerison } else { todo!() };
+    let sys_name = format!("System name = {}", name);
+    let num_cores = format!("Number of cores = {}", app.system.cpus().len());
+    let num_disks = format!("Number of disks = {}", app.system.disks().len());
+    let ker_ver = format!("Kernel version = {}", kVerison);
+    let total_memory = format!("Total memory = {} bytes" , app.system.total_memory());
+    let av_memory = format!("Available memory = {} bytes", app.system.available_memory());
+    let free_memory = format!("Free memory \n = {} bytes", app.system.free_memory());
+    let used_memory = format!("Used memory = {} bytes", app.system.used_memory());
+    let num_process = format!("Number of processes = {} process", app.system.processes().len());
+    let cpu_us = format!("CPU usage  = {:.3} %", app.data_cpu_avg[app.data_cpu_avg.len()-1].1);
+    let mem_us = format!("Memory usage  = {:.3} %", app.data_mem[app.data_mem.len()-1].1);
 
     let text = vec![
-        Spans::from(Span::styled("hiiiiiiiiiiiiii", Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(sys_name , Style::default())),
+        Spans::from(Span::styled(num_cores , Style::default())),
+        Spans::from(Span::styled(num_disks , Style::default())),
+        Spans::from(Span::styled(ker_ver , Style::default())),
+        Spans::from(Span::styled(total_memory , Style::default())),
+        Spans::from(Span::styled(av_memory , Style::default())),
+        Spans::from(Span::styled(free_memory , Style::default())),
+        Spans::from(Span::styled(used_memory , Style::default())),
+        Spans::from(Span::styled(num_process, Style::default())),
+        Spans::from(Span::styled(cpu_us, Style::default())),
+        Spans::from(Span::styled(mem_us, Style::default())),
 
-      
     ];
 
     let create_block = |title| {
         Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().bg(Color::White).fg(Color::Black))
+            .style(Style::default())
             .title(Span::styled(
                 title,
                 Style::default().add_modifier(Modifier::BOLD),
@@ -968,11 +996,43 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     };
 
     let paragraph = Paragraph::new(text)
-        .style(Style::default().bg(Color::White).fg(Color::Black))
+        .style(Style::default())
         .block(create_block("Info about  system."))
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true });
-    f.render_widget(paragraph, chunks_upper[0]);
+    f.render_widget(paragraph, chunks_left[0]);
+
+    let text = vec![
+        Spans::from(Span::styled("Press:" , Style::default())),
+        Spans::from(Span::styled("  'q' to exit." , Style::default())),
+        Spans::from(Span::styled("  'd' to veiw the table and graphs,'t' to veiw the table only, 'g' graphs only." , Style::default())),
+        Spans::from(Span::styled("  Enter to view more infor about the selected process.
+        * " , Style::default())),
+        Spans::from(Span::styled("  'k' to kill the selected process." , Style::default())),
+        Spans::from(Span::styled("  'n' to sort processes by command name , 'p' to sort processes by process ID." , Style::default())),
+        Spans::from(Span::styled("  Run THE agian with argu pstree to print tree." , Style::default())),
+        Spans::from(Span::styled("  Run THE agian with argu u username to get selected user processes only." , Style::default())),
+        
+  
+    ];
+
+    let create_block = |title| {
+        Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default())
+            .title(Span::styled(
+                title,
+                Style::default().add_modifier(Modifier::BOLD),
+            ))
+    };
+
+    let paragraph = Paragraph::new(text)
+        .style(Style::default())
+        .block(create_block("Help how to use THE"))
+        .alignment(Alignment::Left)
+        .wrap(Wrap { trim: true });
+    f.render_widget(paragraph, chunks_right[1]);
+
 
 }
 
@@ -1056,7 +1116,7 @@ fn show_graphs_only<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     ];
     let datasets = vec![
         Dataset::default()
-            .name("CPU Usage",)
+            .name("Memory Usage",)
             .marker(symbols::Marker::Dot)
             .style(Style::default().fg(Color::Blue))
             .data(&app.data_mem),
@@ -1113,7 +1173,7 @@ fn show_table<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let selected_style = Style::default().add_modifier(Modifier::REVERSED);
     let normal_style = Style::default().bg(Color::Blue);
-    let header_cells = ["PID", "USER", "PR", "NI", "VIRT", "RES", "SHR", "S", "%CPU", "%MEM", "TIME+", "COMMAND"]
+    let header_cells = ["PID", "USER", "PTID", "PR", "NI", "RES", "SHR", "S", "%CPU", "%MEM", "TIME+", "COMMAND"]
         .iter()
         .map(|h| Cell::from(*h).style(Style::default().fg(Color::Red)));
     let header = Row::new(header_cells)
