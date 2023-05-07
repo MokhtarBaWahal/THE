@@ -1,9 +1,5 @@
 use sysinfo::{CpuExt,Pid,  ProcessExt,System, SystemExt, PidExt, ProcessStatus, UserExt};
 use psutil::process::Process;
-<<<<<<< HEAD
-use std::env;
-=======
->>>>>>> ea1a5130922d96440e36f58b366b62c3508febd5
 
 use std::thread::sleep;
 
@@ -57,7 +53,7 @@ struct App  {
 
 impl App  {
 
-    fn new(tick_rate: Duration,sys: &System, args: String) -> App  {
+    fn new(tick_rate: Duration,sys: &System) -> App  {
         
         let mut data_cpu_avg  = Vec::<(f64, f64)>::new();
         let mut data_mem     = Vec::<(f64, f64)>::new();
@@ -154,46 +150,24 @@ impl App  {
             a_pid.cmp(&b_pid)
         });
         let sort_bby = 0;
-        if args == "-g" {
-            App {
-                system,
-                data_cpu_avg,
-                data_cpus,
-                data_mem,
-                data_disk,
-                x,
-                time,
-                window: [0.0, 200.0],
-                state: TableState::default(),
-                items,
-                sort_by_what: sort_bby,
-                show_table: false,
-                show_graphs: true,
-                show_single_process: false,
-                oneP_ID: 0,
-    
-            }
-        }
-        else{
-            App {
-                system,
-                data_cpu_avg,
-                data_cpus,
-                data_mem,
-                data_disk,
-                x,
-                time,
-                window: [0.0, 200.0],
-                state: TableState::default(),
-                items,
-                sort_by_what: sort_bby,
-                show_table: true,
-                show_graphs: false,
-                show_single_process: false,
-                oneP_ID: 0,
-                
-    
-            }
+        App {
+            system,
+            data_cpu_avg,
+            data_cpus,
+            data_mem,
+            data_swap,
+            x,
+            time,
+            window: [0.0, 200.0],
+            state: TableState::default(),
+            items,
+            sort_by_what: sort_bby,
+            show_table: true,
+            show_graphs: false,
+            show_single_process: false,
+            oneP_ID: 0,
+            
+
         }
 
     }
@@ -372,7 +346,6 @@ impl App  {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let args: Vec<String> = env::args().collect();
     // setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -383,14 +356,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     // // create app and run it
     let sys = System::new_all();
 
-    let arg_str = if args.len() > 1 {
-        &args[1]
-    } else {
-        ""
-    };
-
     let tick_rate = Duration::from_millis(2000);
-    let app = App::new(tick_rate, &sys, arg_str.to_string());
+    let app = App::new(tick_rate, &sys);
     let res = run_app(&mut terminal, app, tick_rate);
 
     // restore terminal
@@ -1046,4 +1013,4 @@ fn show_one_process <B: Backend>(f: &mut Frame<B>, app: &mut App){
     f.render_widget(paragraph, chunks[0]);
 }
 
-}   
+}
