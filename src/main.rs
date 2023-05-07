@@ -131,7 +131,7 @@ impl App  {
                 priority.to_string(),
                 nice.to_string(),
                 //nice.to_string(),
-                virtual_memory.to_string(),
+                //virtual_memory.to_string(),
                 memory.to_string(),
                 shared_memory.to_string(),
                 state.to_string(),
@@ -339,7 +339,7 @@ impl App  {
                 priority.to_string(),
                 nice.to_string(),
                 //nice.to_string(),
-                virtual_memory.to_string(),
+                //virtual_memory.to_string(),
                 memory.to_string(),
                 shared_memory.to_string(),
                 state.to_string(),
@@ -1005,7 +1005,7 @@ fn show_table<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let selected_style = Style::default().add_modifier(Modifier::REVERSED);
     let normal_style = Style::default().bg(Color::Blue);
-    let header_cells = ["PID", "USER", "PR", "NI", "VIRT", "RES", "SHR", "S", "%CPU", "%MEM", "TIME+", "COMMAND"]
+    let header_cells = ["PID", "USER", "PTID", "PR", "NI", "RES", "SHR", "S", "%CPU", "%MEM", "TIME+", "COMMAND"]
         .iter()
         .map(|h| Cell::from(*h).style(Style::default().fg(Color::Red)));
     let header = Row::new(header_cells)
