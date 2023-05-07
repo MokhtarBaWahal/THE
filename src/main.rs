@@ -168,7 +168,7 @@ impl App  {
                 items,
                 sort_by_what: sort_bby,
                 show_table: true,
-                show_graphs: false,
+                show_graphs: true,
                 show_single_process: false,
                 oneP_ID: 0,
                 user_n: args
@@ -193,7 +193,7 @@ impl App  {
                 items,
                 sort_by_what: sort_bby,
                 show_table: true,
-                show_graphs: false,
+                show_graphs: true,
                 show_single_process: false,
                 oneP_ID: 0,
                 user_n: args,
@@ -819,18 +819,18 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                         .fg(Color::Cyan)
                         .add_modifier(Modifier::BOLD),
                 ))
-                .borders(Borders::ALL),
+                .borders(Borders::ALL).style(Style::default().fg(Color::Cyan)),
         )
         .x_axis(
             Axis::default()
-                .title("Time")
-                .style(Style::default().fg(Color::Gray))
+            .title(Span::styled("Time", Style::default().fg(Color::Green)))
+                .style(Style::default().fg(Color::Cyan))
                 .labels(x_labels)
                 .bounds(app.window),
         )
         .y_axis(
             Axis::default()
-                .title("Percentage")
+            .title(Span::styled("Percentage", Style::default().fg(Color::Green)))
                 .style(Style::default().fg(Color::Cyan))
                 .labels(vec![
                     Span::raw("0"),
@@ -873,18 +873,18 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                         .fg(Color::Cyan)
                         .add_modifier(Modifier::BOLD),
                 ))
-                .borders(Borders::ALL),
+                .borders(Borders::ALL).style(Style::default().fg(Color::Cyan)),
         )
         .x_axis(
             Axis::default()
-                .title("Time")
-                .style(Style::default().fg(Color::Gray))
+            .title(Span::styled("Time", Style::default().fg(Color::Green)))
+                .style(Style::default().fg(Color::Cyan))
                 .labels(x_labels)
                 .bounds(app.window),
         )
         .y_axis(
             Axis::default()
-                .title("Percentage")
+            .title(Span::styled("Percentage", Style::default().fg(Color::Green)))
                 .style(Style::default().fg(Color::Cyan))
                 .labels(vec![
                     Span::raw("0"),
@@ -935,7 +935,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     });
     let t = Table::new(rows)
         .header(header)
-        .block(Block::default().borders(Borders::ALL).title("Table"))
+        .block(Block::default().borders(Borders::ALL).title("Table").style(Style::default().fg(Color::Cyan)))
         .highlight_style(selected_style)
         .highlight_symbol("")
         .widths(&[
@@ -971,17 +971,17 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let mem_us = format!("Memory usage  = {:.3} %", app.data_mem[app.data_mem.len()-1].1);
 
     let text = vec![
-        Spans::from(Span::styled(sys_name , Style::default())),
-        Spans::from(Span::styled(num_cores , Style::default())),
-        Spans::from(Span::styled(num_disks , Style::default())),
-        Spans::from(Span::styled(ker_ver , Style::default())),
-        Spans::from(Span::styled(total_memory , Style::default())),
-        Spans::from(Span::styled(av_memory , Style::default())),
-        Spans::from(Span::styled(free_memory , Style::default())),
-        Spans::from(Span::styled(used_memory , Style::default())),
-        Spans::from(Span::styled(num_process, Style::default())),
-        Spans::from(Span::styled(cpu_us, Style::default())),
-        Spans::from(Span::styled(mem_us, Style::default())),
+        Spans::from(Span::styled(sys_name , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled(num_cores , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled(num_disks , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled(ker_ver , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled(total_memory , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled(av_memory , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled(free_memory , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled(used_memory , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled(num_process, Style::default().fg(Color::Green))),
+        Spans::from(Span::styled(cpu_us, Style::default().fg(Color::Green))),
+        Spans::from(Span::styled(mem_us, Style::default().fg(Color::Green))),
 
     ];
 
@@ -991,27 +991,27 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             .style(Style::default())
             .title(Span::styled(
                 title,
-                Style::default().add_modifier(Modifier::BOLD),
+                Style::default().add_modifier(Modifier::BOLD).fg(Color::Cyan),
             ))
     };
 
     let paragraph = Paragraph::new(text)
-        .style(Style::default())
+        .style(Style::default().fg(Color::Cyan))
         .block(create_block("Info about  system."))
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true });
     f.render_widget(paragraph, chunks_left[0]);
 
     let text = vec![
-        Spans::from(Span::styled("Press:" , Style::default())),
-        Spans::from(Span::styled("  'q' to exit." , Style::default())),
-        Spans::from(Span::styled("  'd' to veiw the table and graphs,'t' to veiw the table only, 'g' graphs only." , Style::default())),
-        Spans::from(Span::styled("  Enter to view more infor about the selected process.
-        * " , Style::default())),
-        Spans::from(Span::styled("  'k' to kill the selected process." , Style::default())),
-        Spans::from(Span::styled("  'n' to sort processes by command name , 'p' to sort processes by process ID." , Style::default())),
-        Spans::from(Span::styled("  Run THE agian with argu pstree to print tree." , Style::default())),
-        Spans::from(Span::styled("  Run THE agian with argu u username to get selected user processes only." , Style::default())),
+        // Spans::from(Span::styled("HOTKEYS" , Style::default().fg(Color::Green))),
+        // Spans::from(Span::styled("  " , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled(" 'q' to exit. 'd' to veiw the table and graphs 't' to veiw the table only 'g' graphs only." , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled("  'Enter' to view more information about the selected process." , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled("  'k' to kill the selected process." , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled("  's' followed by a character for quick search" , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled("  For filtering 'f' followed 'p': PID 'u': User 'r': Priority 'n': Niceness 'e': Memory 'h': Shared Memory 'b': State 'c': %CPU 'm': %MEM 't': Time in seconds" , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled("  './app pstree' to print tree." , Style::default().fg(Color::Green))),
+        Spans::from(Span::styled("  './app u (username)' to get selected user processes only." , Style::default().fg(Color::Green))),
         
   
     ];
@@ -1022,7 +1022,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             .style(Style::default())
             .title(Span::styled(
                 title,
-                Style::default().add_modifier(Modifier::BOLD),
+                Style::default().add_modifier(Modifier::BOLD).fg(Color::Cyan),
             ))
     };
 
@@ -1075,25 +1075,25 @@ fn show_graphs_only<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let chart = Chart::new(datasets)
         .block(
-            Block::default()
+            Block::default().style(Style::default().bg(Color::Red))
                 .title(Span::styled(
                     "CPU usage",
                     Style::default()
                         .fg(Color::Cyan)
                         .add_modifier(Modifier::BOLD),
                 ))
-                .borders(Borders::ALL),
+                .borders(Borders::ALL).style(Style::default().fg(Color::Cyan)),
         )
         .x_axis(
             Axis::default()
-                .title("Time")
-                .style(Style::default().fg(Color::Gray))
+            .title(Span::styled("Time", Style::default().fg(Color::Green)))
+                .style(Style::default().fg(Color::Red))
                 .labels(x_labels)
                 .bounds(app.window),
         )
         .y_axis(
             Axis::default()
-                .title("Percentage")
+            .title(Span::styled("Percentage", Style::default().fg(Color::Green)))
                 .style(Style::default().fg(Color::Cyan))
                 .labels(vec![
                     Span::raw("0"),
@@ -1132,18 +1132,18 @@ fn show_graphs_only<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                         .fg(Color::Cyan)
                         .add_modifier(Modifier::BOLD),
                 ))
-                .borders(Borders::ALL),
+                .borders(Borders::ALL).style(Style::default().fg(Color::Cyan)),
         )
         .x_axis(
             Axis::default()
-                .title("Time")
-                .style(Style::default().fg(Color::Gray))
+                .title(Span::styled("Time", Style::default().fg(Color::Green)))
+                .style(Style::default().fg(Color::Cyan))
                 .labels(x_labels)
                 .bounds(app.window),
         )
         .y_axis(
             Axis::default()
-                .title("Percentage")
+            .title(Span::styled("Percentage", Style::default().fg(Color::Green)))
                 .style(Style::default().fg(Color::Cyan))
                 .labels(vec![
                     Span::raw("0"),
@@ -1192,7 +1192,7 @@ fn show_table<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     });
     let t = Table::new(rows)
         .header(header)
-        .block(Block::default().borders(Borders::ALL).title("Table"))
+        .block(Block::default().borders(Borders::ALL).title("Table").style(Style::default().fg(Color::Cyan)))
         .highlight_style(selected_style)
         .highlight_symbol("")
         .widths(&[
