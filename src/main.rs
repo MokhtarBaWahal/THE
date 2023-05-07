@@ -578,7 +578,7 @@ fn print_process_tree(items:  &[Vec<String>], id: String,  depth: usize) {
 fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let size = f.size();
-
+ 
     
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
@@ -647,6 +647,9 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 .style(Style::default().fg(Color::Cyan))
                 .labels(vec![
                     Span::raw("0"),
+                    Span::styled("25", Style::default().add_modifier(Modifier::BOLD)),
+                    Span::styled("50", Style::default().add_modifier(Modifier::BOLD)),
+                    Span::styled("75", Style::default().add_modifier(Modifier::BOLD)),
                     Span::styled("100", Style::default().add_modifier(Modifier::BOLD)),
                 ])
                 .bounds([0.0, 100.0]),
@@ -706,7 +709,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let rects = Layout::default()
         .constraints([Constraint::Percentage(50)].as_ref())
-        .margin(5)  
+        .margin(0)  
         .split(chunks[1]);
 
     let selected_style = Style::default().add_modifier(Modifier::REVERSED);
@@ -718,6 +721,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .style(normal_style)
         .height(1)
         .bottom_margin(1);
+    let table_data = 
     let rows = app.items.iter().map(|item| {
         let height = item
             .iter()
@@ -747,11 +751,23 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             Constraint::Percentage(8),
             Constraint::Percentage(8),
         ]);
+        
     f.render_stateful_widget(t, rects[0], &mut app.state);
 
-    let block = Block::default().style(Style::default().bg(Color::White).fg(Color::Black));
-    // f.render_widget(block, size);
 
+    let name = if let Some (name ) = app.system.name() { name } else { todo!() };
+    let kVerison = if let Some (kVerison ) = app.system.kernel_version() { kVerison } else { todo!() };
+    let sys_name = format!("System name = {}", name);
+    let num_cores = format!("Number of cores = {}", app.system.cpus().len());
+    let num_disks = format!("Number of disks = {}", app.system.disks().len());
+    let ker_ver = format!("Kernel version = {}", kVerison);
+    let total_memory = format!("Total memory = {} bytes" , app.system.total_memory());
+    let av_memory = format!("Available memory = {} bytes", app.system.available_memory());
+    let free_memory = format!("Free memory \n = {} bytes", app.system.free_memory());
+    let used_memory = format!("Used memory = {} bytes", app.system.used_memory());
+    let num_process = format!("Number of processes = {} process", app.system.processes().len());
+    let cpu_us = format!("CPU usage  = {:.3} %", app.data_cpu_avg[app.data_cpu_avg.len()-1].1);
+    let mem_us = format!("Memory usage  = {:.3} %", app.data_mem[app.data_mem.len()-1].1);
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(5)
@@ -765,15 +781,24 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .split(size);
 
     let text = vec![
-        Spans::from(Span::styled("hiiiiiiiiiiiiii", Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(sys_name , Style::default())),
+        Spans::from(Span::styled(num_cores , Style::default())),
+        Spans::from(Span::styled(num_disks , Style::default())),
+        Spans::from(Span::styled(ker_ver , Style::default())),
+        Spans::from(Span::styled(total_memory , Style::default())),
+        Spans::from(Span::styled(av_memory , Style::default())),
+        Spans::from(Span::styled(free_memory , Style::default())),
+        Spans::from(Span::styled(used_memory , Style::default())),
+        Spans::from(Span::styled(num_process, Style::default())),
+        Spans::from(Span::styled(cpu_us, Style::default())),
+        Spans::from(Span::styled(mem_us, Style::default())),
 
-      
     ];
 
     let create_block = |title| {
         Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().bg(Color::White).fg(Color::Black))
+            .style(Style::default())
             .title(Span::styled(
                 title,
                 Style::default().add_modifier(Modifier::BOLD),
@@ -781,7 +806,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     };
 
     let paragraph = Paragraph::new(text)
-        .style(Style::default().bg(Color::White).fg(Color::Black))
+        .style(Style::default())
         .block(create_block("Info about  system."))
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true });
@@ -869,7 +894,7 @@ fn show_graphs_only<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     ];
     let datasets = vec![
         Dataset::default()
-            .name("CPU Usage",)
+            .name("Memory Usage",)
             .marker(symbols::Marker::Dot)
             .style(Style::default().fg(Color::Blue))
             .data(&app.data_mem),
