@@ -205,7 +205,8 @@ impl App  {
         
    
 
-    fn on_tick(&mut self ,sys: &System) {
+    fn on_tick(&mut self ) {
+        let sys = System::new_all();
         for _ in 0..10{
             self.data_cpu_avg.remove(0);
             self.data_mem.remove(0);
@@ -453,9 +454,9 @@ fn run_app<B: Backend>(
             }
         }
 
-        let sys = System::new_all();
+        
         if last_tick.elapsed() >= tick_rate {
-            app.on_tick(&sys);
+            app.on_tick();
             last_tick = Instant::now();
         }
     }
