@@ -2,6 +2,7 @@ use sysinfo::{CpuExt,Pid,  ProcessExt,System, SystemExt, PidExt, ProcessStatus, 
 use psutil::process::Process;
 
 use std::thread::sleep;
+use std::env;
 
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
@@ -48,7 +49,9 @@ struct App  {
     show_table: bool,
     show_graphs: bool,
     show_single_process: bool,
-    oneP_ID: u32, 
+    oneP_ID: u32,
+    user_n: String, 
+   
 }
 
 impl App  {
@@ -124,7 +127,7 @@ impl App  {
             let tem_process: Vec<String> = vec![
                 pid_string,
                 user_name.name().to_string(),
-                //parent_pid_string,
+                parent_pid_string,
                 priority.to_string(),
                 nice.to_string(),
                 //nice.to_string(),
@@ -150,28 +153,7 @@ impl App  {
             a_pid.cmp(&b_pid)
         });
         let sort_bby = 0;
-        if args == "-g" {
-            App {
-                system,
-                data_cpu_avg,
-                data_cpus,
-                data_mem,
-                data_swap,
-                x,
-                time,
-                window: [0.0, 200.0],
-                state: TableState::default(),
-                items,
-                sort_by_what: sort_bby,
-                show_table: false,
-                show_graphs: true,
-                show_single_process: false,
-                oneP_ID: 0,
-                
-    
-            }
-        }
-        else{
+        if args == "" {
             App {
                 system,
                 data_cpu_avg,
@@ -188,6 +170,32 @@ impl App  {
                 show_graphs: false,
                 show_single_process: false,
                 oneP_ID: 0,
+                user_n: args
+                
+    
+            }
+        }
+        else{
+            items = items.into_iter()
+            .filter(|v| v.get(1)==Some(&args))
+            .collect();
+            App {
+                system,
+                data_cpu_avg,
+                data_cpus,
+                data_mem,
+                data_swap,
+                x,
+                time,
+                window: [0.0, 200.0],
+                state: TableState::default(),
+                items,
+                sort_by_what: sort_bby,
+                show_table: true,
+                show_graphs: false,
+                show_single_process: false,
+                oneP_ID: 0,
+                user_n: args,
                 
     
             }
@@ -327,7 +335,7 @@ impl App  {
             let tem_process: Vec<String> = vec![
                 pid_string,
                 user_name.name().to_string(),
-                //parent_pid_string,
+                parent_pid_string,
                 priority.to_string(),
                 nice.to_string(),
                 //nice.to_string(),
@@ -360,18 +368,37 @@ impl App  {
             items.sort_by_key(|v| v[11].to_lowercase());
 
         }
-      
+       if (self.user_n !="") {
+        items = items.into_iter()
+        .filter(|v| v.get(1)==Some(&self.user_n))
+        .collect();
+       }
         self.items = items;
-    
 
-
-    
 
     }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
+    let mut user_selected ="";
+
+     if args.len()>1 {
+        if args[1]=="pstree"{
+            let sys = System::new_all();
+            let tick_rate = Duration::from_millis(2000);
+            let app = App::new(tick_rate, &sys, user_selected.to_string());
+         
+            print_process_tree(&app.items, "1".to_string(), 0);
+            return Ok(())
+        }
+        if args[1]=="u" && args.len()>2{
+            
+            user_selected= &args[2];
+            
+        }
+
+    } 
     // setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -383,7 +410,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let sys = System::new_all();
 
     let tick_rate = Duration::from_millis(2000);
-    let app = App::new(tick_rate, &sys);
+    let app = App::new(tick_rate, &sys, user_selected.to_string());
     let res = run_app(&mut terminal, app, tick_rate);
 
     // restore terminal
@@ -585,7 +612,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .split(size);
 
 
-    let chunks_upper = Layout::default()
+    let chunks_left = Layout::default()
         .direction(Direction::Vertical)
         .constraints(
             [
@@ -640,11 +667,14 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 .style(Style::default().fg(Color::Cyan))
                 .labels(vec![
                     Span::raw("0"),
+                    Span::styled("25", Style::default().add_modifier(Modifier::BOLD)),
+                    Span::styled("50", Style::default().add_modifier(Modifier::BOLD)),
+                    Span::styled("75", Style::default().add_modifier(Modifier::BOLD)),
                     Span::styled("100", Style::default().add_modifier(Modifier::BOLD)),
                 ])
                 .bounds([0.0, 100.0]),
         );
-    f.render_widget(chart, chunks_upper[1]);
+    f.render_widget(chart, chunks_left[1]);
 
 
     
@@ -698,12 +728,23 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 ])
                 .bounds([0.0, 100.0]),
         );
-    f.render_widget(chart, chunks_upper[2]);
-
+    f.render_widget(chart, chunks_left[2]);
+    let chunks_right = Layout::default()
+    .direction(Direction::Vertical)
+    .constraints(
+        [
+            Constraint::Percentage(80),
+            Constraint::Percentage(20),
+            
+            
+        ]
+        .as_ref(),
+    )
+    .split(chunks[1]);  
     let rects = Layout::default()
         .constraints([Constraint::Percentage(50)].as_ref())
         .margin(0)  
-        .split(chunks[1]);
+        .split(chunks_right[0]);
 
     let selected_style = Style::default().add_modifier(Modifier::REVERSED);
     let normal_style = Style::default().bg(Color::Blue);
@@ -761,17 +802,6 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let num_process = format!("Number of processes = {} process", app.system.processes().len());
     let cpu_us = format!("CPU usage  = {:.3} %", app.data_cpu_avg[app.data_cpu_avg.len()-1].1);
     let mem_us = format!("Memory usage  = {:.3} %", app.data_mem[app.data_mem.len()-1].1);
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .margin(5)
-        .constraints(
-            [
-                Constraint::Percentage(100),
-                
-            ]
-            .as_ref(),
-        )
-        .split(size);
 
     let text = vec![
         Spans::from(Span::styled(sys_name , Style::default())),
@@ -803,7 +833,38 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .block(create_block("Info about  system."))
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true });
-    f.render_widget(paragraph, chunks_upper[0]);
+    f.render_widget(paragraph, chunks_left[0]);
+
+    let text = vec![
+        Spans::from(Span::styled("Press:" , Style::default())),
+        Spans::from(Span::styled("  'q' to exit." , Style::default())),
+        Spans::from(Span::styled("  'd' to veiw the table and graphs,'t' to veiw the table only, 'g' graphs only." , Style::default())),
+        Spans::from(Span::styled("  Enter to view more infor about the selected process.
+        * " , Style::default())),
+        Spans::from(Span::styled("  'k' to kill the selected process." , Style::default())),
+        Spans::from(Span::styled("  'n' to sort processes by command name." , Style::default())),
+        Spans::from(Span::styled(" 'p' to sort processes by process ID." , Style::default())),
+        
+  
+    ];
+
+    let create_block = |title| {
+        Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default())
+            .title(Span::styled(
+                title,
+                Style::default().add_modifier(Modifier::BOLD),
+            ))
+    };
+
+    let paragraph = Paragraph::new(text)
+        .style(Style::default())
+        .block(create_block("Help how to use THE"))
+        .alignment(Alignment::Left)
+        .wrap(Wrap { trim: true });
+    f.render_widget(paragraph, chunks_right[1]);
+
 
 }
 
