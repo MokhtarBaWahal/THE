@@ -232,8 +232,8 @@ impl App  {
         
    
 
-    fn on_tick(&mut self ) {
-        let sys = System::new_all();
+    fn on_tick(&mut self) {
+        // let sys = System::new_all();
         for _ in 0..10{
             self.data_cpu_avg.remove(0);
             self.data_mem.remove(0);
@@ -282,7 +282,7 @@ impl App  {
 
         
         // let s = System::new_all();
-        for (pid, process) in sys.processes() {
+        for (pid, process) in self.system.processes() {
             let pid_string = String::from(pid.as_u32().to_string());
             let parent_id = process.parent();
             let parent_pid_string = match parent_id {
@@ -304,7 +304,16 @@ impl App  {
             let total_memory = self.system.total_memory();
             let mem_percent = (memory as f32 / total_memory as f32) * 100000.0;
             let mem_usage_str = format!("{:.2}%", mem_percent);
+
+            //std::thread::sleep(Duration::from_secs(1));
+            //self.system.refresh_all();
+            //let cpu_usage_start = process.cpu_usage();
+            //std::thread::sleep(std::time::Duration::from_millis(500));
+            //let cpu_usage_end = process.cpu_usage();
+            //let cpu_usage = cpu_usage_end - cpu_usage_start;
             let cpu_usage = process.cpu_usage();
+            
+            
             let cpu_usage_str = format!("{:.2}%", cpu_usage);
             let cpu_time = process.run_time() * 100;
             //let process_u = Process::new(pid_string.parse::<u32>().unwrap()).unwrap();
@@ -337,6 +346,7 @@ impl App  {
                 memory.to_string(),
                 shared_memory.to_string(),
                 state.to_string(),
+                //cpu_usage.to_string(),
                 cpu_usage_str,
                 //cpu_percent.to_string(),
                 mem_usage_str,
@@ -382,7 +392,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
 
     // // create app and run it
-    let sys = System::new_all();
+    let mut sys = System::new_all();
+    sys.refresh_all();
+    
+    //let accurate_cpu_time = sysinfo::MINIMUM_CPU_UPDATE_INTERVAL
 
     let tick_rate = Duration::from_millis(2000);
     let arg_str = if args.len() > 1 {
