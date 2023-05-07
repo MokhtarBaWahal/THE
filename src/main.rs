@@ -3,6 +3,10 @@ use psutil::process::Process;
 
 use std::thread::sleep;
 
+use std::env;
+
+use humantime::parse_duration;
+
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
@@ -227,7 +231,7 @@ impl App  {
     }
 
 
-        
+  
    
 
     fn on_tick(&mut self) {
@@ -357,15 +361,89 @@ impl App  {
         }
 
         if self.sort_by_what==0 {
+            
 
+            
             items.sort_by(|a, b| {
                 let a_pid: i32 = a[0].parse().unwrap_or(0);
                 let b_pid: i32 = b[0].parse().unwrap_or(0);
                 a_pid.cmp(&b_pid)
             });
+        
 
-
-        } else {
+        } 
+        else if self.sort_by_what == 1{
+            items.sort_by(|a, b| a[1].cmp(&b[1]));
+        }
+        else if self.sort_by_what == 2{
+            items.sort_by(|a, b| {
+                let a_pid: i32 = a[2].parse().unwrap_or(0);
+                let b_pid: i32 = b[2].parse().unwrap_or(0);
+                b_pid.cmp(&a_pid)
+            });
+        }
+        else if self.sort_by_what == 3{
+            items.sort_by(|a, b| {
+                let a_pid: i32 = a[3].parse().unwrap_or(0);
+                let b_pid: i32 = b[3].parse().unwrap_or(0);
+                b_pid.cmp(&a_pid)
+            });
+        }
+        else if self.sort_by_what == 4{
+            items.sort_by(|a, b| {
+                let a_pid: i32 = a[4].parse().unwrap_or(0);
+                let b_pid: i32 = b[4].parse().unwrap_or(0);
+                b_pid.cmp(&a_pid)
+            });
+        }
+        else if self.sort_by_what == 5{
+            items.sort_by(|a, b| {
+                let a_pid: i32 = a[5].parse().unwrap_or(0);
+                let b_pid: i32 = b[5].parse().unwrap_or(0);
+                b_pid.cmp(&a_pid)
+            });
+        }
+        else if self.sort_by_what == 6{
+            items.sort_by(|a, b| {
+                let a_pid: i32 = a[6].parse().unwrap_or(0);
+                let b_pid: i32 = b[6].parse().unwrap_or(0);
+                b_pid.cmp(&a_pid)
+            });
+        }
+        else if self.sort_by_what == 7{
+            items.sort_by(|a, b| {
+                let a_state = a[7].chars().next();
+                let b_state = b[7].chars().next();
+                a_state.partial_cmp(&b_state).unwrap()
+            });
+            
+        }
+        else if self.sort_by_what == 8{
+            items.sort_by(|a, b| {
+                let a_cpu_usage = a[8].trim_end_matches('%').parse::<f32>().unwrap_or(0.0);
+                let b_cpu_usage = b[8].trim_end_matches('%').parse::<f32>().unwrap_or(0.0);
+                b_cpu_usage.partial_cmp(&a_cpu_usage).unwrap_or(std::cmp::Ordering::Equal)
+            });
+            
+        }
+        else if self.sort_by_what == 9{
+            items.sort_by(|a, b| {
+                let a_cpu_usage = a[9].trim_end_matches('%').parse::<f32>().unwrap_or(0.0);
+                let b_cpu_usage = b[9].trim_end_matches('%').parse::<f32>().unwrap_or(0.0);
+                b_cpu_usage.partial_cmp(&a_cpu_usage).unwrap_or(std::cmp::Ordering::Equal)
+            });
+        }
+        else if self.sort_by_what == 10{
+            items.sort_by(|a, b| {
+                let a_time = parse_duration(&a[10]).unwrap_or_else(|_| Duration::from_secs(0)).as_secs();
+                let b_time = parse_duration(&b[10]).unwrap_or_else(|_| Duration::from_secs(0)).as_secs();
+                b_time.cmp(&a_time)
+            });
+        }
+        else if self.sort_by_what == 11{
+            items.sort_by(|a, b| b[11].cmp(&a[3]));
+        }  
+        else {
             
             items.sort_by_key(|v| v[11].to_lowercase());
 
@@ -396,7 +474,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     //let accurate_cpu_time = sysinfo::MINIMUM_CPU_UPDATE_INTERVAL
 
     let tick_rate = Duration::from_millis(2000);
-    let app = App::new(tick_rate, &sys);
+    let arg_str = if args.len() > 1 {
+        &args[1]
+    } else {
+        ""
+    };
+    let app = App::new(tick_rate, &sys, arg_str.to_string());
     let res = run_app(&mut terminal, app, tick_rate);
 
     // restore terminal
@@ -421,9 +504,12 @@ fn run_app<B: Backend>(
     tick_rate: Duration,
 ) -> io::Result<()> {
     let mut last_tick = Instant::now();
+    let mut s_pressed = false;
+    let mut f_pressed = false;
+    let mut last_searched_letter: Option<char> = None;
+    let mut selected_index: Option<usize> = None;
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
-
         let timeout = tick_rate
             .checked_sub(last_tick.elapsed())
             .unwrap_or_else(|| Duration::from_secs(0));
@@ -444,11 +530,11 @@ fn run_app<B: Backend>(
                         app.show_graphs= true;
                     } 
                     KeyCode::Char('p') =>  {
-                        app.items.sort_by(|a, b| {
-                            let a_pid: i32 = a[0].parse().unwrap_or(0);
-                            let b_pid: i32 = b[0].parse().unwrap_or(0);
-                            a_pid.cmp(&b_pid)
-                        });
+                        // app.items.sort_by(|a, b| {
+                        //     let a_pid: i32 = a[0].parse().unwrap_or(0);
+                        //     let b_pid: i32 = b[0].parse().unwrap_or(0);
+                        //     a_pid.cmp(&b_pid)
+                        // });
                         app.sort_by_what = 0;
 
                     },
@@ -469,6 +555,101 @@ fn run_app<B: Backend>(
                         };
 
                     },
+
+                    KeyCode::Char('s') => {
+                        s_pressed = true;
+                    
+                    },
+
+                    KeyCode::Char('f') => {
+                        // app.items.sort_by(|a, b| {
+                        //     let a_pid: i32 = a[8].parse().unwrap_or(0);
+                        //     let b_pid: i32 = b[8].parse().unwrap_or(0);
+                        //     b_pid.cmp(&a_pid)
+                        // });
+                        f_pressed = true;
+                    
+                    },
+                    KeyCode::Char(c) if f_pressed => {
+                        if c == 'p'{
+                            app.sort_by_what = 0;
+                        }
+                        else if c == 'u'{
+                            app.sort_by_what = 1;
+
+                        }
+                        else if c == 'r'{
+                            app.sort_by_what = 2;
+                        }
+                        else if c == 'n'{
+                            app.sort_by_what = 3;
+
+                        }
+                        else if c == 'v'{
+                            app.sort_by_what = 4;
+
+                        }
+                        else if c == 'e'{
+                            app.sort_by_what = 5;
+
+                        }
+                        else if c == 'h'{
+                            app.sort_by_what = 6;
+
+                        }
+                        else if c == 'b'{
+                            app.sort_by_what = 7;
+
+                        }
+                        else if c == 'c'{ 
+                            app.sort_by_what = 8;
+
+                        }
+                        else if c == 'm'{
+                            app.sort_by_what = 9;
+
+                        }
+                        else if c == 't'{
+                            app.sort_by_what = 10;
+
+                        }
+                        else if c == 'c'{
+                            app.sort_by_what = 11;
+
+                        }
+                        
+                        f_pressed = false;
+                    }
+
+                    KeyCode::Char(c) if s_pressed => {
+                        let mut start_index = 0;
+                        if let Some(index) = selected_index {
+        // If there is a recorded index, start the search from the next process after the last selected process
+                        start_index = index + 1;
+                        }   
+                        // Search for the next process starting with 'a'
+                        if let Some(index) = app.items.iter().skip(start_index).position(|row| row[11].starts_with(c)) {
+                            // Do something with the matching process
+
+                            // Set the selected index to the index of the matching process
+                            app.state.select(Some(start_index + index));
+                            // Record the index of the last selected process
+                            selected_index = Some(start_index + index);
+                        } else {
+                            // If there are no more matches, start the search again from the beginning of the process list
+                            if let Some(index) = app.items.iter().position(|row| row[11].starts_with(c)) {
+                                // Do something with the matching process
+
+                                // Set the selected index to the index of the matching process
+                                app.state.select(Some(index));
+                                // Record the index of the last selected process
+                                selected_index = Some(index);
+                            }
+                        }
+                                            s_pressed = false;
+                    },
+
+
                     KeyCode::Enter =>  {
                         let i = match app.state.selected() {
                             Some(i) => {
@@ -584,7 +765,7 @@ fn print_process_tree(items:  &[Vec<String>], id: String,  depth: usize) {
 fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let size = f.size();
- 
+
     
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
@@ -704,9 +885,6 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 .style(Style::default().fg(Color::Cyan))
                 .labels(vec![
                     Span::raw("0"),
-                    Span::styled("25", Style::default().add_modifier(Modifier::BOLD)),
-                    Span::styled("50", Style::default().add_modifier(Modifier::BOLD)),
-                    Span::styled("75", Style::default().add_modifier(Modifier::BOLD)),
                     Span::styled("100", Style::default().add_modifier(Modifier::BOLD)),
                 ])
                 .bounds([0.0, 100.0]),
@@ -715,7 +893,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let rects = Layout::default()
         .constraints([Constraint::Percentage(50)].as_ref())
-        .margin(0)  
+        .margin(5)  
         .split(chunks[1]);
 
     let selected_style = Style::default().add_modifier(Modifier::REVERSED);
@@ -727,7 +905,6 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .style(normal_style)
         .height(1)
         .bottom_margin(1);
-    // let table_data =
     let rows = app.items.iter().map(|item| {
         let height = item
             .iter()
@@ -757,23 +934,11 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             Constraint::Percentage(8),
             Constraint::Percentage(8),
         ]);
-        
     f.render_stateful_widget(t, rects[0], &mut app.state);
 
+    let block = Block::default().style(Style::default().bg(Color::White).fg(Color::Black));
+    // f.render_widget(block, size);
 
-    let name = if let Some (name ) = app.system.name() { name } else { todo!() };
-    let kVerison = if let Some (kVerison ) = app.system.kernel_version() { kVerison } else { todo!() };
-    let sys_name = format!("System name = {}", name);
-    let num_cores = format!("Number of cores = {}", app.system.cpus().len());
-    let num_disks = format!("Number of disks = {}", app.system.disks().len());
-    let ker_ver = format!("Kernel version = {}", kVerison);
-    let total_memory = format!("Total memory = {} bytes" , app.system.total_memory());
-    let av_memory = format!("Available memory = {} bytes", app.system.available_memory());
-    let free_memory = format!("Free memory \n = {} bytes", app.system.free_memory());
-    let used_memory = format!("Used memory = {} bytes", app.system.used_memory());
-    let num_process = format!("Number of processes = {} process", app.system.processes().len());
-    let cpu_us = format!("CPU usage  = {:.3} %", app.data_cpu_avg[app.data_cpu_avg.len()-1].1);
-    let mem_us = format!("Memory usage  = {:.3} %", app.data_mem[app.data_mem.len()-1].1);
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(5)
@@ -787,24 +952,15 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .split(size);
 
     let text = vec![
-        Spans::from(Span::styled(sys_name , Style::default())),
-        Spans::from(Span::styled(num_cores , Style::default())),
-        Spans::from(Span::styled(num_disks , Style::default())),
-        Spans::from(Span::styled(ker_ver , Style::default())),
-        Spans::from(Span::styled(total_memory , Style::default())),
-        Spans::from(Span::styled(av_memory , Style::default())),
-        Spans::from(Span::styled(free_memory , Style::default())),
-        Spans::from(Span::styled(used_memory , Style::default())),
-        Spans::from(Span::styled(num_process, Style::default())),
-        Spans::from(Span::styled(cpu_us, Style::default())),
-        Spans::from(Span::styled(mem_us, Style::default())),
+        Spans::from(Span::styled("hiiiiiiiiiiiiii", Style::default().bg(Color::Green))),
 
+      
     ];
 
     let create_block = |title| {
         Block::default()
             .borders(Borders::ALL)
-            .style(Style::default())
+            .style(Style::default().bg(Color::White).fg(Color::Black))
             .title(Span::styled(
                 title,
                 Style::default().add_modifier(Modifier::BOLD),
@@ -812,7 +968,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     };
 
     let paragraph = Paragraph::new(text)
-        .style(Style::default())
+        .style(Style::default().bg(Color::White).fg(Color::Black))
         .block(create_block("Info about  system."))
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true });
@@ -900,7 +1056,7 @@ fn show_graphs_only<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     ];
     let datasets = vec![
         Dataset::default()
-            .name("Memory Usage",)
+            .name("CPU Usage",)
             .marker(symbols::Marker::Dot)
             .style(Style::default().fg(Color::Blue))
             .data(&app.data_mem),
