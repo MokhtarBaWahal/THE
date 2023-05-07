@@ -3,6 +3,8 @@ use psutil::process::Process;
 
 use std::thread::sleep;
 
+use std::env;
+
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
@@ -53,7 +55,7 @@ struct App  {
 
 impl App  {
 
-    fn new(tick_rate: Duration,sys: &System) -> App  {
+    fn new(tick_rate: Duration,sys: &System, args: String) -> App  {
         
         let mut data_cpu_avg  = Vec::<(f64, f64)>::new();
         let mut data_mem     = Vec::<(f64, f64)>::new();
@@ -150,25 +152,50 @@ impl App  {
             a_pid.cmp(&b_pid)
         });
         let sort_bby = 0;
-        App {
-            system,
-            data_cpu_avg,
-            data_cpus,
-            data_mem,
-            data_swap,
-            x,
-            time,
-            window: [0.0, 200.0],
-            state: TableState::default(),
-            items,
-            sort_by_what: sort_bby,
-            show_table: true,
-            show_graphs: false,
-            show_single_process: false,
-            oneP_ID: 0,
-            
+        if args == "-g" {
+            App {
+                system,
+                data_cpu_avg,
+                data_cpus,
+                data_mem,
+                data_swap,
+                x,
+                time,
+                window: [0.0, 200.0],
+                state: TableState::default(),
+                items,
+                sort_by_what: sort_bby,
+                show_table: false,
+                show_graphs: true,
+                show_single_process: false,
+                oneP_ID: 0,
+                
+    
+            }
+        }
+        else{
+            App {
+                system,
+                data_cpu_avg,
+                data_cpus,
+                data_mem,
+                data_swap,
+                x,
+                time,
+                window: [0.0, 200.0],
+                state: TableState::default(),
+                items,
+                sort_by_what: sort_bby,
+                show_table: true,
+                show_graphs: false,
+                show_single_process: false,
+                oneP_ID: 0,
+                
+    
+            }
 
         }
+        
 
     }
 
@@ -346,6 +373,7 @@ impl App  {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    let args: Vec<String> = env::args().collect();
     // setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -357,7 +385,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     let sys = System::new_all();
 
     let tick_rate = Duration::from_millis(2000);
-    let app = App::new(tick_rate, &sys);
+    let arg_str = if args.len() > 1 {
+        &args[1]
+    } else {
+        ""
+    };
+    let app = App::new(tick_rate, &sys, arg_str.to_string());
     let res = run_app(&mut terminal, app, tick_rate);
 
     // restore terminal
