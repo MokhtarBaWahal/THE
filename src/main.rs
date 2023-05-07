@@ -39,7 +39,7 @@ struct App  {
     data_cpu_avg: Vec<(f64, f64)>,
     data_cpus:    Vec<f32>,
     data_mem:     Vec<(f64, f64)>,
-    data_disk:    Vec<(f64, f64)>,
+    data_swap:    Vec<(f64, f64)>,
     x: f64,
     time: f64,
     window: [f64; 2],
@@ -58,7 +58,7 @@ impl App  {
         
         let mut data_cpu_avg  = Vec::<(f64, f64)>::new();
         let mut data_mem     = Vec::<(f64, f64)>::new();
-        let mut data_disk = Vec::<(f64, f64)>::new();
+        let mut data_swap = Vec::<(f64, f64)>::new();
 
         let mut data_cpus: Vec<f32>= Vec::new();
 
@@ -72,7 +72,7 @@ impl App  {
         for i in 0..200 {
             data_cpu_avg.push ((i as f64, 0.0));
             data_mem.push((i as f64, 0.0));
-            data_disk.push((i as f64, 0.0));
+            data_swap.push((i as f64, 0.0));
         }
 
         let time = 35.0*(tick_rate.as_secs_f64() as f64 );
@@ -156,7 +156,7 @@ impl App  {
             data_cpu_avg,
             data_cpus,
             data_mem,
-            data_disk,
+            data_swap,
             x,
             time,
             window: [0.0, 200.0],
@@ -255,8 +255,8 @@ impl App  {
             factor = factor * -1.0;
         }
         
-        let memory_usage_percentage = (self.system.free_memory() as f64 / self.system.total_memory() as f64) * 100.0;
-        let mut last_mem = self.data_mem[ self.data_mem.len()-1].1;
+        let memory_usage_percentage = (self.system.used_memory() as f64 / self.system.total_memory() as f64) * 100.0;
+        let swap_usage_percentage = (self.system.used_memory() as f64 / self.system.total_memory() as f64) * 100.0;
 
         for _ in 0..10{
        
@@ -621,6 +621,8 @@ fn print_process_tree(items:  &[Vec<String>], id: String,  depth: usize) {
 fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let size = f.size();
+
+    
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(
@@ -692,7 +694,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 ])
                 .bounds([0.0, 100.0]),
         );
-    f.render_widget(chart, chunks_upper[0]);
+    f.render_widget(chart, chunks_upper[1]);
 
 
     
@@ -743,7 +745,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 ])
                 .bounds([0.0, 100.0]),
         );
-    f.render_widget(chart, chunks_upper[1]);
+    f.render_widget(chart, chunks_upper[2]);
 
     let rects = Layout::default()
         .constraints([Constraint::Percentage(50)].as_ref())
@@ -789,6 +791,44 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             Constraint::Percentage(8),
         ]);
     f.render_stateful_widget(t, rects[0], &mut app.state);
+
+    let block = Block::default().style(Style::default().bg(Color::White).fg(Color::Black));
+    // f.render_widget(block, size);
+
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(5)
+        .constraints(
+            [
+                Constraint::Percentage(100),
+                
+            ]
+            .as_ref(),
+        )
+        .split(size);
+
+    let text = vec![
+        Spans::from(Span::styled("hiiiiiiiiiiiiii", Style::default().bg(Color::Green))),
+
+      
+    ];
+
+    let create_block = |title| {
+        Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().bg(Color::White).fg(Color::Black))
+            .title(Span::styled(
+                title,
+                Style::default().add_modifier(Modifier::BOLD),
+            ))
+    };
+
+    let paragraph = Paragraph::new(text)
+        .style(Style::default().bg(Color::White).fg(Color::Black))
+        .block(create_block("Info about  system."))
+        .alignment(Alignment::Left)
+        .wrap(Wrap { trim: true });
+    f.render_widget(paragraph, chunks_upper[0]);
 
 }
 
