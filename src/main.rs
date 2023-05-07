@@ -1242,7 +1242,7 @@ fn show_one_process <B: Backend>(f: &mut Frame<B>, app: &mut App){
     let mut long_line = s.repeat(usize::from(size.width) / s.len() + 4);
     long_line.push('\n');
 
-    let block = Block::default().style(Style::default().bg(Color::White).fg(Color::Black));
+    let block = Block::default().style(Style::default().bg(Color::Black).fg(Color::White));
     // f.render_widget(block, size);
 
     let chunks = Layout::default()
@@ -1261,24 +1261,24 @@ fn show_one_process <B: Backend>(f: &mut Frame<B>, app: &mut App){
         
 
        
-    Spans::from(Span::styled(name, Style::default().bg(Color::Green))),
-    Spans::from(Span::styled(status, Style::default().bg(Color::Green))),
-    Spans::from(Span::styled(memory, Style::default().bg(Color::Green))),
-    Spans::from(Span::styled(exe, Style::default().bg(Color::Green))),
-    Spans::from(Span::styled(run_time, Style::default().bg(Color::Green))),
-    Spans::from(Span::styled(cmd, Style::default().bg(Color::Green))),
-    Spans::from(Span::styled(start_time, Style::default().bg(Color::Green))),
-    Spans::from(Span::styled(cpu_usage, Style::default().bg(Color::Green))),
-    Spans::from(Span::styled(cwd, Style::default().bg(Color::Green))),
-    Spans::from(Span::styled(virtual_memory, Style::default().bg(Color::Green))),
-    Spans::from(Span::styled(parent, Style::default().bg(Color::Green))),
-    Spans::from(Span::styled(root, Style::default().bg(Color::Green))),
+    Spans::from(Span::styled(name, Style::default().fg(Color::Green))),
+    Spans::from(Span::styled(status, Style::default().fg(Color::Green))),
+    Spans::from(Span::styled(memory, Style::default().fg(Color::Green))),
+    Spans::from(Span::styled(exe, Style::default().fg(Color::Green))),
+    Spans::from(Span::styled(run_time, Style::default().fg(Color::Green))),
+    Spans::from(Span::styled(cmd, Style::default().fg(Color::Green))),
+    Spans::from(Span::styled(start_time, Style::default().fg(Color::Green))),
+    Spans::from(Span::styled(cpu_usage, Style::default().fg(Color::Green))),
+    Spans::from(Span::styled(cwd, Style::default().fg(Color::Green))),
+    Spans::from(Span::styled(virtual_memory, Style::default().fg(Color::Green))),
+    Spans::from(Span::styled(parent, Style::default().fg(Color::Green))),
+    Spans::from(Span::styled(root, Style::default().fg(Color::Green))),
     ];
 
     let create_block = |title| {
         Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().bg(Color::White).fg(Color::Black))
+            .style(Style::default().bg(Color::Black).fg(Color::Cyan))
             .title(Span::styled(
                 title,
                 Style::default().add_modifier(Modifier::BOLD),
@@ -1286,7 +1286,7 @@ fn show_one_process <B: Backend>(f: &mut Frame<B>, app: &mut App){
     };
 
     let paragraph = Paragraph::new(text)
-        .style(Style::default().bg(Color::White).fg(Color::Black))
+        .style(Style::default().bg(Color::Black).fg(Color::Green))
         .block(create_block("Info about process with pid: ".to_owned() + &pid.to_string()))
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true });
