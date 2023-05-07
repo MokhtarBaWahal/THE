@@ -748,7 +748,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let selected_style = Style::default().add_modifier(Modifier::REVERSED);
     let normal_style = Style::default().bg(Color::Blue);
-    let header_cells = ["PID", "USER", "PR", "NI", "VIRT", "RES", "SHR", "S", "%CPU", "%MEM", "TIME+", "COMMAND"]
+    let header_cells = ["PID", "USER", "PTID", "PR", "NI",  "RES", "SHR", "S", "%CPU", "%MEM", "TIME+", "COMMAND"]
         .iter()
         .map(|h| Cell::from(*h).style(Style::default().fg(Color::Red)));
     let header = Row::new(header_cells)
@@ -842,8 +842,9 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         Spans::from(Span::styled("  Enter to view more infor about the selected process.
         * " , Style::default())),
         Spans::from(Span::styled("  'k' to kill the selected process." , Style::default())),
-        Spans::from(Span::styled("  'n' to sort processes by command name." , Style::default())),
-        Spans::from(Span::styled(" 'p' to sort processes by process ID." , Style::default())),
+        Spans::from(Span::styled("  'n' to sort processes by command name , 'p' to sort processes by process ID." , Style::default())),
+        Spans::from(Span::styled("  Run THE agian with argu pstree to print tree." , Style::default())),
+        Spans::from(Span::styled("  Run THE agian with argu u username to get selected user processes only." , Style::default())),
         
   
     ];
