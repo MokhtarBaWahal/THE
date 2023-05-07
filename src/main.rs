@@ -1,6 +1,9 @@
 use sysinfo::{CpuExt,Pid,  ProcessExt,System, SystemExt, PidExt, ProcessStatus, UserExt};
 use psutil::process::Process;
+<<<<<<< HEAD
 use std::env;
+=======
+>>>>>>> ea1a5130922d96440e36f58b366b62c3508febd5
 
 use std::thread::sleep;
 
@@ -39,7 +42,7 @@ struct App  {
     data_cpu_avg: Vec<(f64, f64)>,
     data_cpus:    Vec<f32>,
     data_mem:     Vec<(f64, f64)>,
-    data_disk:    Vec<(f64, f64)>,
+    data_swap:    Vec<(f64, f64)>,
     x: f64,
     time: f64,
     window: [f64; 2],
@@ -58,7 +61,7 @@ impl App  {
         
         let mut data_cpu_avg  = Vec::<(f64, f64)>::new();
         let mut data_mem     = Vec::<(f64, f64)>::new();
-        let mut data_disk = Vec::<(f64, f64)>::new();
+        let mut data_swap = Vec::<(f64, f64)>::new();
 
         let mut data_cpus: Vec<f32>= Vec::new();
 
@@ -72,7 +75,7 @@ impl App  {
         for i in 0..200 {
             data_cpu_avg.push ((i as f64, 0.0));
             data_mem.push((i as f64, 0.0));
-            data_disk.push((i as f64, 0.0));
+            data_swap.push((i as f64, 0.0));
         }
 
         let time = 35.0*(tick_rate.as_secs_f64() as f64 );
@@ -209,25 +212,6 @@ impl App  {
         };
         self.state.select(Some(i));
     }
-
-    pub fn next_o(&mut self, index: u32) {
-        // let i = match self.state.selected() {
-        //     Some(i) => {
-        //         if i >= self.items.len() - 1 {
-        //             0
-        //         } else {
-        //             i + 1
-        //         }
-        //     }
-        //     None => 0,
-        // };
-        let i = match self.state.selected() {
-            Some(i) => i,
-            None => 0,
-        };
-        self.state.select(Some(i + index as usize));
-        
-    }
     
     pub fn previous(&mut self) {
         let i = match self.state.selected() {
@@ -247,7 +231,7 @@ impl App  {
         
    
 
-    fn on_tick(&mut self) {
+    fn on_tick(&mut self ) {
         let sys = System::new_all();
         for _ in 0..10{
             self.data_cpu_avg.remove(0);
@@ -277,8 +261,8 @@ impl App  {
             factor = factor * -1.0;
         }
         
-        let memory_usage_percentage = (self.system.free_memory() as f64 / self.system.total_memory() as f64) * 100.0;
-        let mut last_mem = self.data_mem[ self.data_mem.len()-1].1;
+        let memory_usage_percentage = (self.system.used_memory() as f64 / self.system.total_memory() as f64) * 100.0;
+        let swap_usage_percentage = (self.system.used_memory() as f64 / self.system.total_memory() as f64) * 100.0;
 
         for _ in 0..10{
        
@@ -431,40 +415,13 @@ fn run_app<B: Backend>(
     tick_rate: Duration,
 ) -> io::Result<()> {
     let mut last_tick = Instant::now();
-    let mut last_down_press = Instant::now();
-    let mut down_key_held = false;
-    let mut down_click = 0;
-    let mut held_down = false;
-     //let start_time = Instant::now();
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
 
         let timeout = tick_rate
             .checked_sub(last_tick.elapsed())
             .unwrap_or_else(|| Duration::from_secs(0));
-        let elapsed_time = last_tick.elapsed();
-        // if elapsed_time < tick_rate {
-        //     std::thread::sleep(tick_rate - elapsed_time);
-        // }
-        //if crossterm::event::poll(Duration::from_secs(0))? {
-            // if let Ok(Event::Key(crossterm::event::KeyEvent { code: KeyCode::Down, .. })) = crossterm::event::read() {
-            //     if !held_down {
-            //         down_click += 1;
-            //         last_down_press = std::time::Instant::now();
-            //         held_down = true;
-            //         app.next_o(down_click);
-            //     } else {
-            //         let now = std::time::Instant::now();
-            //         if now.duration_since(last_down_press) >= Duration::from_millis(200) {
-            //             down_click += 1;
-            //             last_down_press = now;
-            //             app.next_o(down_click);
-            //         }
-            //     }
-            // } else {
-            //     held_down = false;
-            //     down_click = 0;
-            // }
+        if crossterm::event::poll(timeout)? {
             if let Event::Key(key) = event::read()? {
                 match key.code {
                     KeyCode::Char('q') => return Ok(()),
@@ -523,43 +480,14 @@ fn run_app<B: Backend>(
 
                     },
                     
-                    // KeyCode::Down => {
-                    //     let now = Instant::now();
-                    //     down_click += 1;
-                    //     if now.duration_since(last_down_press) >= Duration::from_millis(200) {
-                    //         app.next_o(down_click);
-                    //         last_down_press = now;
-                    //         down_click = 0;
-                    //     }
-                    // },
-
-                    // KeyCode::Down => {
-                    //     if !held_down {
-                    //         down_click += 1;
-                    //         last_down_press = std::time::Instant::now();
-                    //         held_down = true;
-                    //         app.next_o(down_click);
-                    //     } else {
-                    //         let now = std::time::Instant::now();
-                    //         if now.duration_since(last_down_press) >= Duration::from_millis(200) {
-                    //             down_click += 1;
-                    //             last_down_press = now;
-                    //             app.next_o(down_click);
-                    //         }
-                    //     }
-                    // } else {
-                    //     held_down = false;
-                    //     down_click = 0;
-                    // }
-                    
                     KeyCode::Down => app.next(),
                     KeyCode::Up => app.previous(),
                     _ => {}
                 }
             }
-        //}
+        }
 
-         //let sys = System::new_all();
+        
         if last_tick.elapsed() >= tick_rate {
             app.on_tick();
             last_tick = Instant::now();
@@ -650,6 +578,8 @@ fn print_process_tree(items:  &[Vec<String>], id: String,  depth: usize) {
 fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let size = f.size();
+
+    
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(
@@ -721,7 +651,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 ])
                 .bounds([0.0, 100.0]),
         );
-    f.render_widget(chart, chunks_upper[0]);
+    f.render_widget(chart, chunks_upper[1]);
 
 
     
@@ -772,7 +702,7 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 ])
                 .bounds([0.0, 100.0]),
         );
-    f.render_widget(chart, chunks_upper[1]);
+    f.render_widget(chart, chunks_upper[2]);
 
     let rects = Layout::default()
         .constraints([Constraint::Percentage(50)].as_ref())
@@ -818,6 +748,44 @@ fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             Constraint::Percentage(8),
         ]);
     f.render_stateful_widget(t, rects[0], &mut app.state);
+
+    let block = Block::default().style(Style::default().bg(Color::White).fg(Color::Black));
+    // f.render_widget(block, size);
+
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(5)
+        .constraints(
+            [
+                Constraint::Percentage(100),
+                
+            ]
+            .as_ref(),
+        )
+        .split(size);
+
+    let text = vec![
+        Spans::from(Span::styled("hiiiiiiiiiiiiii", Style::default().bg(Color::Green))),
+
+      
+    ];
+
+    let create_block = |title| {
+        Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().bg(Color::White).fg(Color::Black))
+            .title(Span::styled(
+                title,
+                Style::default().add_modifier(Modifier::BOLD),
+            ))
+    };
+
+    let paragraph = Paragraph::new(text)
+        .style(Style::default().bg(Color::White).fg(Color::Black))
+        .block(create_block("Info about  system."))
+        .alignment(Alignment::Left)
+        .wrap(Wrap { trim: true });
+    f.render_widget(paragraph, chunks_upper[0]);
 
 }
 
@@ -1023,7 +991,7 @@ fn show_one_process <B: Backend>(f: &mut Frame<B>, app: &mut App){
 
    
     // Words made "loooong" to demonstrate line breaking.
-    let s = "hhhh";
+    let s = " hhhhhhhhhhhhhhhhhhhh";
     let mut long_line = s.repeat(usize::from(size.width) / s.len() + 4);
     long_line.push('\n');
 
