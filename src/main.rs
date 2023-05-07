@@ -898,25 +898,25 @@ fn show_one_process <B: Backend>(f: &mut Frame<B>, app: &mut App){
     let pid = app.oneP_ID;
     if let Some(process) = app.system.process(Pid::from_u32(pid)) {
 
-        let name = process.name();
-        let status = format!("{:?}", process.status());
-        let memory = process.memory();
-        let exe = process.exe().display();
-        let run_time = process.run_time();
-        let cmd = format!("{:?}", process.cmd());
-        let start_time = process.start_time();
-        let cpu_usage = process.cpu_usage();
-        let cwd = process.cwd().display();
-        let virtual_memory = process.virtual_memory();
-        let parent = format!("{:?}", process.parent());
-        let root = process.root().display();
+        let name = format!("Name: {:?}",process.name());
+        let status = format!("Status: {:?}", process.status());
+        let memory = format!("Memory: {:?} bytes", process.memory());
+        let exe = format!("Executable: {:?} ", process.exe().display());
+        let run_time = format!("Run time: {:?} seconds", process.run_time());
+        let cmd = format!("Command{:?}", process.cmd());
+        let start_time = format!("Start time: {:?} seconds",process.start_time());
+        let cpu_usage = format!("CPU usage: {:?} %",process.cpu_usage());
+        let cwd = format!("Current working directory: {:?}",process.cwd().display());
+        let virtual_memory = format!("Virtual memory: {:?}", process.virtual_memory());
+        let parent = format!("Parent process: {:?}", process.parent());
+        let root = format!("Root: {:?}", process.root().display());
 
         let output = format!("PID: {}\n Name: {}\nStatus: {}\nMemory: {} bytes\nExecutable: {}\nRun time: {} seconds\nCommand: {:?}\nStart time: {} seconds\nCPU usage: {}%\nCurrent working directory: {}\nVirtual memory: {} bytes\nParent process: {:?}\nRoot directory: {}",
                             pid, name, status, memory, exe, run_time, cmd, start_time, cpu_usage, cwd, virtual_memory, parent, root);
 
    
     // Words made "loooong" to demonstrate line breaking.
-    let s = "";
+    let s = " hhhhhhhhhhhhhhhhhhhh";
     let mut long_line = s.repeat(usize::from(size.width) / s.len() + 4);
     long_line.push('\n');
 
@@ -936,8 +936,18 @@ fn show_one_process <B: Backend>(f: &mut Frame<B>, app: &mut App){
         .split(size);
 
     let text = vec![
-        
-        Spans::from(Span::styled(&long_line, Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(name, Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(status, Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(memory, Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(exe, Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(run_time, Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(cmd, Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(start_time, Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(cpu_usage, Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(cwd, Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(virtual_memory, Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(parent, Style::default().bg(Color::Green))),
+        Spans::from(Span::styled(root, Style::default().bg(Color::Green))),
       
     ];
 
@@ -953,7 +963,7 @@ fn show_one_process <B: Backend>(f: &mut Frame<B>, app: &mut App){
 
     let paragraph = Paragraph::new(text)
         .style(Style::default().bg(Color::White).fg(Color::Black))
-        .block(create_block("Right, wrap"))
+        .block(create_block("Info about process with pid: ".to_owned() + &pid.to_string()))
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true });
     f.render_widget(paragraph, chunks[0]);
