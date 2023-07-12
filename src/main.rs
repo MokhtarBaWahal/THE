@@ -717,8 +717,7 @@ fn kill_process_and_children(pid: u32) {
 
 }
 
-git config --global user.email youshaarif13@gmail.com
-git config --global user.name YushaBinArif3
+
 
 
 fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
