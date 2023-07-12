@@ -1,8 +1,6 @@
 use sysinfo::{CpuExt,Pid,  ProcessExt,System, SystemExt, PidExt, ProcessStatus, UserExt};
-use psutil::process::Process;
-
-use std::thread::sleep;
 use std::env;
+
 use humantime::parse_duration;
 
 use crossterm::{
@@ -27,12 +25,10 @@ use tui::{
 
 use nix::sys::signal::{kill, Signal};
 use nix::unistd::Pid as nixPID;
+use nix::libc::{getpriority, id_t, PRIO_PROCESS};
+use std::ffi::CString;
 
-
-
-// use crate::App::UI;
-
-// mod AppUI;
+mod helperFunctions;
 
 struct App  {
     
@@ -119,9 +115,8 @@ impl App  {
             //     Some(u) => user_f = u.name().to_string_lossy(),
             // }
             //Some(priority)
-            use nix::libc::{getpriority, id_t, PRIO_PROCESS};
-            use std::ffi::CString;
-            let cstr = CString::new("").unwrap();
+            
+            let _cstr = CString::new("").unwrap();
             let pid_n = pid_string.parse::<u32>().unwrap();
             let priority = 20 + unsafe { getpriority(PRIO_PROCESS as u32, pid_n as id_t) };
             let nice = -(20 - priority);
@@ -270,7 +265,6 @@ impl App  {
         }
         
         let memory_usage_percentage = (self.system.used_memory() as f64 / self.system.total_memory() as f64) * 100.0;
-        let swap_usage_percentage = (self.system.used_memory() as f64 / self.system.total_memory() as f64) * 100.0;
 
         for _ in 0..10{
        
@@ -319,15 +313,7 @@ impl App  {
             let uid = process.user_id();
             //let user_name = self.system.get_user_by_id(uid);
             let user_name = self.system.get_user_by_id(uid.unwrap()).unwrap();
-            // let user: Option<User> = get_user_by_uid(uid);
-            // let user_f = "unkown";
-            // match user {
-            //     Some(u) => user_f = u.name().to_string_lossy(),
-            // }
-            //Some(priority)
-            use nix::libc::{getpriority, id_t, PRIO_PROCESS};
-            use std::ffi::CString;
-            let cstr = CString::new("").unwrap();
+    
             let pid_n = pid_string.parse::<u32>().unwrap();
             let priority = 20 + unsafe { getpriority(PRIO_PROCESS as u32, pid_n as id_t) };
             let nice = -(20 - priority);
@@ -461,7 +447,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let tick_rate = Duration::from_millis(2000);
             let app = App::new(tick_rate, &sys, user_selected.to_string());
          
-            print_process_tree(&app.items, "1".to_string(), 0);
+            helperFunctions::print_process_tree(&app.items, "1".to_string(), 0);
             return Ok(())
         }
         if args[1]=="u" && args.len()>2{
@@ -510,7 +496,6 @@ fn run_app<B: Backend>(
     let mut last_tick = Instant::now();
     let mut s_pressed = false;
     let mut f_pressed = false;
-    let mut last_searched_letter: Option<char> = None;
     let mut selected_index: Option<usize> = None;
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
@@ -549,7 +534,7 @@ fn run_app<B: Backend>(
 
                     // },
                     KeyCode::Char('k') =>  {
-                        let i = match app.state.selected() {
+                        let _i = match app.state.selected() {
                             Some(i) => {
                                 let pid_string  =&app.items[i][0] ;
                                 let pid = pid_string.parse::<i32>().unwrap();
@@ -651,7 +636,7 @@ fn run_app<B: Backend>(
 
 
                     KeyCode::Enter =>  {
-                        let i = match app.state.selected() {
+                        let _i = match app.state.selected() {
                             Some(i) => {
                                 let pid_string  =&app.items[i][0] ;
                                 let pid = pid_string.parse::<i32>().unwrap();
@@ -684,7 +669,7 @@ fn run_app<B: Backend>(
 
 fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
-    if (app.show_single_process){
+    if app.show_single_process {
 
         show_one_process(f, app);
         
@@ -719,9 +704,9 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
 
 fn kill_process_and_children(pid: u32) {
-    let mut system = System::new();
+    let  system = System::new();
     //let pid = Pid::from_raw(pid);
-    for (pid2, process) in system.processes() {
+    for (_pid2, process) in system.processes() {
         if process.parent() == Some(Pid::from_u32(pid)) {
             kill_process_and_children(process.pid().as_u32());
         }
@@ -732,34 +717,8 @@ fn kill_process_and_children(pid: u32) {
 
 }
 
-
-fn print_process_tree(items:  &[Vec<String>], id: String,  depth: usize) {
-    let padding = "  ".repeat(depth);
-    let result = items.iter().find(|&v| v[0] == id);
-    let mut p_name = "";
-    if let Some(vec) = result {
-        if let Some(name) = vec.get(12) {
-            p_name= name;
-        }
-    }
-    if(id=="1"){
-
-        println!("{}──({})",  p_name, id);
-    } else{
-
-        println!("{}└──── {} ({})", padding, p_name, id); 
-    }
-   
-    let children: Vec<String> = items
-        .iter()
-        .filter(|&v| v[2] == id)  // Filter out sub-vectors with third element != "3"
-        .map(|v| v[0].clone())  // Map each remaining sub-vector to its first element
-        .collect();  // Collect the results into a new vector
-    for child in children {
-        print_process_tree(items, child, depth + 4);
-    }
-
-}
+git config --global user.email youshaarif13@gmail.com
+git config --global user.name YushaBinArif3
 
 
 fn show_full_app<B: Backend>(f: &mut Frame<B>, app: &mut App) {
@@ -1233,7 +1192,7 @@ fn show_one_process <B: Backend>(f: &mut Frame<B>, app: &mut App){
         let root = format!("Root: {:?}", process.root().display());
 
         
-        let output = format!("PID: {}\n Name: {}\nStatus: {}\nMemory: {} bytes\nExecutable: {}\nRun time: {} seconds\nCommand: {:?}\nStart time: {} seconds\nCPU usage: {}%\nCurrent working directory: {}\nVirtual memory: {} bytes\nParent process: {:?}\nRoot directory: {}",
+        let _output = format!("PID: {}\n Name: {}\nStatus: {}\nMemory: {} bytes\nExecutable: {}\nRun time: {} seconds\nCommand: {:?}\nStart time: {} seconds\nCPU usage: {}%\nCurrent working directory: {}\nVirtual memory: {} bytes\nParent process: {:?}\nRoot directory: {}",
                             pid, name, status, memory, exe, run_time, cmd, start_time, cpu_usage, cwd, virtual_memory, parent, root);
 
    
@@ -1242,7 +1201,7 @@ fn show_one_process <B: Backend>(f: &mut Frame<B>, app: &mut App){
     let mut long_line = s.repeat(usize::from(size.width) / s.len() + 4);
     long_line.push('\n');
 
-    let block = Block::default().style(Style::default().bg(Color::Black).fg(Color::White));
+    let _block = Block::default().style(Style::default().bg(Color::Black).fg(Color::White));
     // f.render_widget(block, size);
 
     let chunks = Layout::default()
