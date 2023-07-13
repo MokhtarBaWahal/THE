@@ -18,35 +18,26 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+
 
 
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="images/Screenshot 2023-07-13 155956.png">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  <a>
+    <img src="images/Screenshot 2023-07-13 155956.png" alt="Logo" width="220" height="80">
   </a>
 
 <h3 align="center">THE Linux Task Manager</h3>
 
   <p align="center">
-    project_description
+   A user-friendly Linux process manager with a sleek UI, providing essential functionalities like process monitoring, sorting, killing, and process tree visualization. It offers a unique experience for both beginners and experienced users, combining simplicity and functionality in one tool. Powered by Rust and TUI libraries, THE delivers efficient system monitoring and control.
     <br />
-    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
+    <a href=""><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
-    ·
-    <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/github_username/repo_name/issues">Request Feature</a>
+<!--     <a href="https://docs.google.com/document/d/18K7eTcpfHaQp7JcKcI5FmpmiFu3SScy7qODZuFaczyg/edit?usp=sharing">Technical Report</a> -->
   </p>
 </div>
 
