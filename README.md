@@ -26,7 +26,7 @@
 <br />
 <div align="center">
   <a>
-    <img src="images/Screenshot 2023-07-13 155956.png" alt="Logo" width="220" height="80">
+    <img src="images/logo.png" alt="Logo" width="400" height="150">
   </a>
 
 <h3 align="center">THE Linux Task Manager</h3>
@@ -84,14 +84,8 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 
 ### Built With
 
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
+* <img src="images/NicePng_rust-png_348422.png"  width="60" height="50">
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
