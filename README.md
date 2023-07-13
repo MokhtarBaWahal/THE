@@ -73,10 +73,10 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
+![Alt text](https://github.com/MokhtarBaWahal/THE/blob/57e0bca0112b7f0f490dd90a129c7665939277b4/images/main.png)
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`
+Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `MokhtarBaWahal`, `THE`, `mbawhil`, `mokhtar-ba-wahal-3b55281a1`, `email_client`, `email`, `project_title`, `project_description`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -110,7 +110,7 @@ This is an example of how to list things you need to use the software and how to
 1. Get a free API Key at [https://example.com](https://example.com)
 2. Clone the repo
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   git clone https://github.com/MokhtarBaWahal/THE.git
    ```
 3. Install NPM packages
    ```sh
@@ -144,7 +144,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [ ] Feature 3
     - [ ] Nested Feature
 
-See the [open issues](https://github.com/github_username/repo_name/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/MokhtarBaWahal/THE/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -180,9 +180,9 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
+Your Name - [@mbawhil](https://twitter.com/mbawhil) - email@email_client.com
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
+Project Link: [https://github.com/MokhtarBaWahal/THE](https://github.com/MokhtarBaWahal/THE)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -201,18 +201,18 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
-[contributors-url]: https://github.com/github_username/repo_name/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
-[forks-url]: https://github.com/github_username/repo_name/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
-[stars-url]: https://github.com/github_username/repo_name/stargazers
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
-[issues-url]: https://github.com/github_username/repo_name/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
-[license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/MokhtarBaWahal/THE.svg?style=for-the-badge
+[contributors-url]: https://github.com/MokhtarBaWahal/THE/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/MokhtarBaWahal/THE.svg?style=for-the-badge
+[forks-url]: https://github.com/MokhtarBaWahal/THE/network/members
+[stars-shield]: https://img.shields.io/github/stars/MokhtarBaWahal/THE.svg?style=for-the-badge
+[stars-url]: https://github.com/MokhtarBaWahal/THE/stargazers
+[issues-shield]: https://img.shields.io/github/issues/MokhtarBaWahal/THE.svg?style=for-the-badge
+[issues-url]: https://github.com/MokhtarBaWahal/THE/issues
+[license-shield]: https://img.shields.io/github/license/MokhtarBaWahal/THE.svg?style=for-the-badge
+[license-url]: https://github.com/MokhtarBaWahal/THE/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/linkedin_username
+[linkedin-url]: https://linkedin.com/in/mokhtar-ba-wahal-3b55281a1
 [product-screenshot]: images/screenshot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
