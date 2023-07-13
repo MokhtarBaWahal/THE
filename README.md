@@ -73,10 +73,19 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
+This is the main view of our program where it is shown the table of processes and the CPU and memory graphs along with some info about the system and help info. 
+<br/>
+<br/>
 ![Alt text](https://github.com/MokhtarBaWahal/THE/blob/57e0bca0112b7f0f490dd90a129c7665939277b4/images/main.png)
 
+In another view, user can see the table or the graphs alone. 
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `MokhtarBaWahal`, `THE`, `mbawhil`, `mokhtar-ba-wahal-3b55281a1`, `email_client`, `email`, `project_title`, `project_description`
+| Table  view                            | Graphs view                            |
+| ----------------------------------- | ----------------------------------- |
+| ![Table](https://github.com/MokhtarBaWahal/THE/blob/319fcc775b323dcb868868ac5ed31c27ad9b0715/images/THE2.png) | ![graph](https://github.com/MokhtarBaWahal/THE/blob/319fcc775b323dcb868868ac5ed31c27ad9b0715/images/THE3.png) |
+
+But, if the user selected a process from the table and pressed Enter, info about this process will be shown as in the pic:
+![one](https://github.com/MokhtarBaWahal/THE/blob/319fcc775b323dcb868868ac5ed31c27ad9b0715/images/THE4.png)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -94,31 +103,30 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
 To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
+You need to use cargo to install THE.
+* Cargo 
   ```sh
-  npm install npm@latest -g
+  sudo apt-get update -g
+  sudo apt-get -y install cargo
   ```
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
+1. Make sure you are using Linux OS. 
 2. Clone the repo
    ```sh
    git clone https://github.com/MokhtarBaWahal/THE.git
    ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
+3. Install cargo packages if not installed
+
+4. Cd to the repo dir and run the follwing
    ```js
-   const API_KEY = 'ENTER YOUR API';
+   cargo build
+   ./target/debug/hello_cargo
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
