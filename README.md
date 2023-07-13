@@ -136,9 +136,17 @@ You need to use cargo to install THE.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+* q key quits/exits 
+* d key to view the table and graphs 
+* t key to view the table only 
+* g key to view graphs only 
+* Enter key to view more information about the selected process 
+* Ctrl + k key to kill the selected process 
+* Ctrl +  key followed by a character for quick search
+* For filtering followed by character:  p(pid), u (user), r(priority), n(niceness), e: memory, h:(shared memory), b(state), c(cpu), m (memory), or t (time in sec).
+* ./app pstree to print tree
+* ./app u (username) to get selected user processes only 
 
-_For more examples, please refer to the [Documentation](https://example.com)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
