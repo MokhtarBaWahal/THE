@@ -189,7 +189,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Mokhtar Salem Ba Wahal - [@mbawhil](https://twitter.com/mbawhil) - email@email_client.com
+Mokhtar Salem Ba Wahal - [@mbawhil](https://twitter.com/mbawhil) - mokhtarsalem@aucegypt.edu
 
 Project Link: [https://github.com/MokhtarBaWahal/THE](https://github.com/MokhtarBaWahal/THE)
 
